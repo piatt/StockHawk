@@ -1,4 +1,4 @@
-package com.sam_chordas.android.stockhawk.touch_helper;
+package com.piatt.udacity.stockhawk.touch_helper;
 
 import android.view.View;
 

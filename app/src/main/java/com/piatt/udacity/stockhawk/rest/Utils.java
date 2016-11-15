@@ -1,9 +1,9 @@
-package com.sam_chordas.android.stockhawk.rest;
+package com.piatt.udacity.stockhawk.rest;
 
 import android.content.ContentProviderOperation;
 import android.util.Log;
-import com.sam_chordas.android.stockhawk.data.QuoteColumns;
-import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.piatt.udacity.stockhawk.data.QuoteColumns;
+import com.piatt.udacity.stockhawk.data.QuoteProvider;
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;

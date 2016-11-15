@@ -1,9 +1,8 @@
-package com.sam_chordas.android.stockhawk.rest;
+package com.piatt.udacity.stockhawk.rest;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,11 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.sam_chordas.android.stockhawk.R;
-import com.sam_chordas.android.stockhawk.data.QuoteColumns;
-import com.sam_chordas.android.stockhawk.data.QuoteProvider;
-import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperAdapter;
-import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperViewHolder;
+import com.piatt.udacity.stockhawk.R;
+import com.piatt.udacity.stockhawk.data.QuoteColumns;
+import com.piatt.udacity.stockhawk.data.QuoteProvider;
+import com.piatt.udacity.stockhawk.touch_helper.ItemTouchHelperAdapter;
+import com.piatt.udacity.stockhawk.touch_helper.ItemTouchHelperViewHolder;
 
 /**
  * Created by sam_chordas on 10/6/15.
@@ -27,7 +26,6 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     implements ItemTouchHelperAdapter{
 
   private static Context mContext;
-  private static Typeface robotoLight;
   private boolean isPercent;
   public QuoteCursorAdapter(Context context, Cursor cursor){
     super(context, cursor);
@@ -36,7 +34,6 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
 
   @Override
   public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
-    robotoLight = Typeface.createFromAsset(mContext.getAssets(), "fonts/Roboto-Light.ttf");
     View itemView = LayoutInflater.from(parent.getContext())
         .inflate(R.layout.list_item_quote, parent, false);
     ViewHolder vh = new ViewHolder(itemView);
@@ -92,7 +89,6 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     public ViewHolder(View itemView){
       super(itemView);
       symbol = (TextView) itemView.findViewById(R.id.stock_symbol);
-      symbol.setTypeface(robotoLight);
       bidPrice = (TextView) itemView.findViewById(R.id.bid_price);
       change = (TextView) itemView.findViewById(R.id.change);
     }

@@ -1,4 +1,4 @@
-package com.sam_chordas.android.stockhawk.ui;
+package com.piatt.udacity.stockhawk.ui;
 
 import android.app.LoaderManager;
 import android.content.Context;
@@ -8,9 +8,10 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.ActionBar;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -20,20 +21,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.sam_chordas.android.stockhawk.R;
-import com.sam_chordas.android.stockhawk.data.QuoteColumns;
-import com.sam_chordas.android.stockhawk.data.QuoteProvider;
-import com.sam_chordas.android.stockhawk.rest.QuoteCursorAdapter;
-import com.sam_chordas.android.stockhawk.rest.RecyclerViewItemClickListener;
-import com.sam_chordas.android.stockhawk.rest.Utils;
-import com.sam_chordas.android.stockhawk.service.StockIntentService;
-import com.sam_chordas.android.stockhawk.service.StockTaskService;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
 import com.google.android.gms.gcm.Task;
-import com.melnykov.fab.FloatingActionButton;
-import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
+import com.piatt.udacity.stockhawk.R;
+import com.piatt.udacity.stockhawk.data.QuoteColumns;
+import com.piatt.udacity.stockhawk.data.QuoteProvider;
+import com.piatt.udacity.stockhawk.rest.QuoteCursorAdapter;
+import com.piatt.udacity.stockhawk.rest.RecyclerViewItemClickListener;
+import com.piatt.udacity.stockhawk.rest.Utils;
+import com.piatt.udacity.stockhawk.service.StockIntentService;
+import com.piatt.udacity.stockhawk.service.StockTaskService;
+import com.piatt.udacity.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
 
 public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
@@ -92,7 +93,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
 
     FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-    fab.attachToRecyclerView(recyclerView);
+//    fab.attachToRecyclerView(recyclerView);
     fab.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         if (isConnected){
