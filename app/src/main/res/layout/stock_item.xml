@@ -1,0 +1,47 @@
+<android.support.v7.widget.GridLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/medium_margin"
+    android:layout_marginBottom="@dimen/medium_margin"
+    android:layout_marginStart="@dimen/standard_margin"
+    android:layout_marginEnd="@dimen/standard_margin"
+    app:useDefaultMargins="true"
+    app:columnCount="5">
+
+    <TextView
+        android:id="@+id/symbol_view"
+        android:textAllCaps="true"
+        app:layout_gravity="start"/>
+
+    <TextView
+        android:id="@+id/exchange_view"
+        android:textAllCaps="true"
+        android:text="NASDAQ"/>
+
+    <android.support.v4.widget.Space
+        app:layout_gravity="fill"
+        app:layout_columnWeight="1"
+        app:layout_rowSpan="2"/>
+
+    <TextView
+        android:id="@+id/price_view"
+        app:layout_gravity="end"
+        app:layout_columnSpan="2"/>
+
+    <TextView
+        android:id="@+id/company_view"
+        app:layout_gravity="start"
+        app:layout_columnSpan="2"
+        android:text="Google, Inc."/>
+
+    <TextView
+        android:id="@+id/percent_delta_view"/>
+
+    <TextView
+        android:id="@+id/price_delta_view"
+        app:layout_gravity="end"
+        android:text="+34.90"/>
+
+</android.support.v7.widget.GridLayout>

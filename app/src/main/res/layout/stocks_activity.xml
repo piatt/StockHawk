@@ -11,20 +11,18 @@
         <android.support.v7.widget.Toolbar
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="@string/app_name"
-            app:titleTextAppearance="@style/TextAppearance.AppCompat.Large.Inverse">
+            android:theme="@style/Toolbar"
+            app:title="@string/app_name">
 
-            <TextView
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/refresh_button"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
-                android:gravity="center"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:clickable="true"
-                android:text="$"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large.Inverse"
-                android:background="?selectableItemBackgroundBorderless"/>
+                android:paddingStart="@dimen/standard_margin"
+                android:paddingEnd="@dimen/standard_margin"
+                android:background="?selectableItemBackgroundBorderless"
+                android:src="@drawable/refresh_icon"/>
 
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
@@ -55,7 +53,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/standard_margin"
         android:src="@drawable/fab_icon"
         app:layout_behavior="com.piatt.udacity.stockhawk.ui.FabBehavior"/>
 
