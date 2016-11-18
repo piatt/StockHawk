@@ -1,39 +1,38 @@
 package com.piatt.udacity.stockhawk.view;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.InputType;
 import android.util.Log;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
-import com.afollestad.materialdialogs.MaterialDialog;
+import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerViewAdapter;
+import com.jakewharton.rxbinding.view.RxView;
 import com.piatt.udacity.stockhawk.R;
 import com.piatt.udacity.stockhawk.manager.ApiManager;
 import com.piatt.udacity.stockhawk.model.Stock;
+import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
 import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class StocksActivity extends AppCompatActivity {
+public class StocksActivity extends RxAppCompatActivity {
+    @BindView(R.id.refresh_button) AppCompatImageButton refreshButton;
     @BindView(R.id.refresh_layout) SwipeRefreshLayout refreshLayout;
+    @BindView(R.id.message_layout) LinearLayout messageLayout;
     @BindView(R.id.stocks_view) RecyclerView stocksView;
-    @BindView(R.id.empty_view) TextView emptyView;
+    @BindView(R.id.add_button) FloatingActionButton addButton;
 
     private StocksAdapter stocksAdapter;
 
@@ -44,23 +43,14 @@ public class StocksActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         configureStocksView();
-        refreshLayout.setOnRefreshListener(this::fetchStocks);
+        configureRefreshViews();
+        configureAddButton();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         fetchStocks();
-    }
-
-    private boolean isConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-    }
-
-    private void networkToast() {
-        Toast.makeText(this, getString(R.string.network_toast), Toast.LENGTH_SHORT).show();
     }
 
     private void configureStocksView() {
@@ -71,35 +61,77 @@ public class StocksActivity extends AppCompatActivity {
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(stockItemTouchHelperCallback);
         itemTouchHelper.attachToRecyclerView(stocksView);
+
+        RxRecyclerViewAdapter.dataChanges(stocksAdapter)
+                .compose(bindToLifecycle())
+                .subscribe(adapter -> {
+                    boolean isEmpty = adapter.getItemCount() <= 0;
+                    RxView.visibility(messageLayout).call(isEmpty);
+                });
+    }
+
+    private void configureRefreshViews() {
+        refreshLayout.setOnRefreshListener(this::fetchStocks);
+        RxView.clicks(refreshButton)
+                .compose(bindToLifecycle())
+                .subscribe(click -> fetchStocks());
+    }
+
+    private void configureAddButton() {
+        RxView.clicks(addButton)
+                .compose(bindToLifecycle())
+                .subscribe(click -> {
+                    Log.d("TEST", "Add a stock!");
+                });
+
+//        RxRecyclerView.scrollStateChanges(stocksView)
+//                .compose(bindToLifecycle())
+//                .subscribe(state -> {
+//                    switch (state) {
+//                        case SCROLL_STATE_IDLE: addButton.show();
+//                            break;
+//                        case SCROLL_STATE_DRAGGING: addButton.hide();
+//                            break;
+//                    }
+//                });
+
+//        RxRecyclerView.scrollEvents(stocksView)
+//                .compose(bindToLifecycle())
+//                .subscribe(state -> {
+//                    Log.d("TEST", "dy: " + state.dy());
+//                });
     }
 
     private void fetchStocks() {
         List<String> symbols = Arrays.asList("AAPL", "MSFT", "YHOO", "TSLA", "GOOG");
 
-        Observable.from(symbols)
-                .doOnSubscribe(() -> {
-                    Log.d("TEST", "doOnSubscribe");
-                    if (!refreshLayout.isRefreshing()) {
-                        refreshLayout.setRefreshing(true);
-                    }
-                })
-                .doOnNext(symbol -> {
-                    Log.d("TEST", "doOnNext: " + symbol);
-                    ApiManager.getApiManager().getQuote(symbol)
-                            .subscribe(stock -> {
-                                Log.d("TEST", "getQuote: " + symbol + " isValid: " + stock.isValid());
-                                if (stock.isValid()) {
-                                    stocksAdapter.addStock(stock);
-                                }
-                            });
-                })
-                .doOnCompleted(() -> {
-                    Log.d("TEST", "doOnCompleted");
-                    refreshLayout.setRefreshing(false);
-                })
-                .doOnError(Throwable::printStackTrace)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe();
+        if (ApiManager.getApiManager().isConnected(this)) {
+            Observable.from(symbols)
+                    .doOnSubscribe(() -> {
+                        if (!refreshLayout.isRefreshing()) {
+                            refreshLayout.setRefreshing(true);
+                        }
+                    })
+                    .doOnNext(symbol -> {
+                        ApiManager.getApiManager().getQuote(symbol)
+                                .subscribe(stock -> {
+                                    if (stock.isValid()) {
+                                        stocksAdapter.addStock(stock);
+                                    }
+                                }, error -> {
+                                    Snackbar.make(messageLayout, R.string.error_message, Snackbar.LENGTH_LONG).show();
+                                });
+                    })
+                    .doOnCompleted(() -> {
+                        refreshLayout.setRefreshing(false);
+                        Snackbar.make(messageLayout, R.string.data_message, Snackbar.LENGTH_LONG).show();
+                    })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe();
+        }
+        else {
+            Snackbar.make(messageLayout, R.string.data_message, Snackbar.LENGTH_LONG).show();
+        }
     }
 
     private ItemTouchHelper.Callback stockItemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START | ItemTouchHelper.END) {
@@ -112,31 +144,8 @@ public class StocksActivity extends AppCompatActivity {
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             int position = viewHolder.getAdapterPosition();
             Stock stock = stocksAdapter.removeStock(position);
-
-            Snackbar snackbar = Snackbar.make(stocksView, getString(R.string.stock_removal_message, stock.getSymbol()), Snackbar.LENGTH_LONG);
-            snackbar.setAction(R.string.stock_removal_action, view -> stocksAdapter.addStock(stock, position));
-            snackbar.show();
+            Snackbar.make(messageLayout, getString(R.string.remove_message, stock.getSymbol()), Snackbar.LENGTH_LONG)
+                    .setAction(R.string.remove_action, view -> stocksAdapter.addStock(stock, position)).show();
         }
     };
-
-    @OnClick(R.id.refresh_button)
-    public void onRefreshButtonClick() {
-        fetchStocks();
-    }
-
-    @OnClick(R.id.add_button)
-    public void onAddButtonClick() {
-        if (isConnected()) {
-            new MaterialDialog.Builder(StocksActivity.this).title(R.string.symbol_search)
-                    .content(R.string.content_test)
-                    .inputType(InputType.TYPE_CLASS_TEXT)
-                    .input(R.string.input_hint, R.string.input_prefill, (dialog, input) -> {
-                        // On FAB click, receive user input. Make sure the stock doesn't already exist
-                        // in the DB and proceed accordingly
-                    })
-                    .show();
-        } else {
-            networkToast();
-        }
-    }
 }

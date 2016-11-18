@@ -27,13 +27,33 @@
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
-    <TextView
-        android:id="@+id/empty_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="No data available"
-        android:visibility="invisible"/>
+    <LinearLayout
+        android:id="@+id/message_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="@dimen/app_icon"
+            android:layout_height="@dimen/app_icon"
+            android:layout_marginBottom="@dimen/small_margin"
+            android:src="@mipmap/ic_launcher"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/empty_message_header"
+            style="@style/HeaderView"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/empty_message_caption"
+            style="@style/CaptionView"/>
+
+    </LinearLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"
@@ -55,6 +75,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/standard_margin"
         android:src="@drawable/add_icon"
-        app:layout_behavior="com.piatt.udacity.stockhawk.ui.FabBehavior"/>
+        app:layout_behavior="com.piatt.udacity.stockhawk.view.FabBehavior"/>
 
 </android.support.design.widget.CoordinatorLayout>

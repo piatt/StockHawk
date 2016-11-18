@@ -24,17 +24,20 @@ public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
 
     public void addStock(Stock stock) {
         stocks.add(stock);
-        notifyItemInserted(stocks.size() - 1);
+        // notifyItemInserted(stocks.size() - 1);
+        notifyDataSetChanged();
     }
 
     public void addStock(Stock stock, int position) {
         stocks.add(position, stock);
-        notifyItemInserted(position);
+        // notifyItemInserted(position);
+        notifyDataSetChanged();
     }
 
     public Stock removeStock(int position) {
         Stock stock = stocks.remove(position);
-        notifyItemRemoved(position);
+        // notifyItemRemoved(position);
+        notifyDataSetChanged();
         return stock;
     }
 
@@ -60,8 +63,8 @@ public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
         @BindView(R.id.symbol_view) TextView symbolView;
         @BindView(R.id.company_view) TextView companyView;
         @BindView(R.id.price_view) TextView priceView;
-        @BindView(R.id.percent_delta_view) TextView percentDeltaView;
         @BindView(R.id.price_delta_view) TextView priceDeltaView;
+        @BindView(R.id.percent_delta_view) TextView percentDeltaView;
 
         public StockViewHolder(View itemView) {
             super(itemView);
@@ -73,11 +76,11 @@ public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
             symbolView.setText(stock.getSymbol());
             companyView.setText(stock.getCompany());
             priceView.setText(stock.getPrice());
-            percentDeltaView.setText(stock.getPercentDelta());
             priceDeltaView.setText(stock.getPriceDelta());
+            percentDeltaView.setText(stock.getPercentDelta());
             int deltaColor = stock.hasPositiveDelta() ? positiveColor : negativeColor;
-            percentDeltaView.setTextColor(deltaColor);
             priceDeltaView.setTextColor(deltaColor);
+            percentDeltaView.setTextColor(deltaColor);
         }
 
         private void onClick() {

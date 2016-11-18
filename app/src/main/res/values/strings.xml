@@ -1,7 +1,12 @@
 <resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Stock Hawk</string>
-    <string name="stock_removal_action">UNDO</string>
-    <string name="stock_removal_message"><xliff:g id="stock">%1$s</xliff:g> removed</string>
+    <string name="empty_message_header">No Stocks Available</string>
+    <string name="empty_message_caption">Add a stock below to see it listed here.</string>
+    <string name="data_message">You\'re all up to date!</string>
+    <string name="error_message">Oops! Something went wrong. Refresh to try again.</string>
+    <string name="connection_message">Network Disconnected. Please reconnect, then refresh to try again.</string>
+    <string name="remove_message"><xliff:g id="stock">%1$s</xliff:g> removed</string>
+    <string name="remove_action">UNDO</string>
 
     <string name="symbol_search">Symbol Search</string>
     <string name="content_test">Search for a Stock Symbol</string>

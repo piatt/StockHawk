@@ -31,13 +31,13 @@
         style="@style/CompanyView"/>
 
     <TextView
-        android:id="@+id/percent_delta_view"
+        android:id="@+id/price_delta_view"
         android:layout_marginEnd="@dimen/medium_margin"
         app:layout_gravity="end"
         style="@style/DeltaView"/>
 
     <TextView
-        android:id="@+id/price_delta_view"
+        android:id="@+id/percent_delta_view"
         style="@style/DeltaView"/>
 
 </android.support.v7.widget.GridLayout>

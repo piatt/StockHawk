@@ -11,6 +11,12 @@
         <item name="android:textColorPrimaryInverse">@android:color/white</item>
     </style>
 
+    <!-- Empty Layout -->
+    <style name="HeaderView" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="CaptionView" parent="TextAppearance.AppCompat.Small"/>
+
     <!-- Stock Item -->
     <style name="SymbolView" parent="TextAppearance.AppCompat.Display1">
         <item name="android:textAllCaps">true</item>

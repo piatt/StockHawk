@@ -1,5 +1,9 @@
 package com.piatt.udacity.stockhawk.manager;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import com.piatt.udacity.stockhawk.model.Stock;
 
 import lombok.Getter;
@@ -24,6 +28,12 @@ public class ApiManager {
                 .build();
 
         stocksApi = retrofit.create(StocksApi.class);
+    }
+
+    public boolean isConnected(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
 
     public Observable<Stock> getQuote(String symbol) {
