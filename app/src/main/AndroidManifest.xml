@@ -13,34 +13,18 @@
 
     <application
         android:allowBackup="true"
+        android:supportsRtl="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
         <activity
-            android:name="com.piatt.udacity.stockhawk.ui.MyStocksActivity"
+            android:name="com.piatt.udacity.stockhawk.view.StocksActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-        <service
-            android:name="com.piatt.udacity.stockhawk.service.StockTaskService"
-            android:exported="true"
-            android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
-            <intent-filter>
-                <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY"/>
-            </intent-filter>
-        </service>
-
-        <service android:name="com.piatt.udacity.stockhawk.service.StockIntentService"/>
-
-        <provider
-            android:name="com.piatt.udacity.stockhawk.data.generated.QuoteProvider"
-            android:authorities="com.piatt.udacity.stockhawk.data.QuoteProvider"
-            android:exported="false"/>
-
     </application>
 </manifest>

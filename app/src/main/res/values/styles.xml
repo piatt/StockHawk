@@ -1,5 +1,5 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
@@ -12,18 +12,10 @@
     </style>
 
     <!-- Stock Item -->
-    <style name="DeltaView" parent="TextAppearance.AppCompat.Display1">
-        <!--<item name="android:textSize">20sp</item>-->
-        <item name="android:textColor">#FFF</item>
-        <!--<item name="android:textStyle">bold</item>-->
-    </style>
-
-    <style name="BidPriceTextStyle">
-        <item name="android:textSize">20sp</item>
-    </style>
-
-    <style name="StockSymbolTextStyle">
-        <item name="android:textSize">25sp</item>
+    <style name="SymbolView" parent="TextAppearance.AppCompat.Display1">
         <item name="android:textAllCaps">true</item>
     </style>
+    <style name="PriceView" parent="TextAppearance.AppCompat.Display1"/>
+    <style name="CompanyView" parent="TextAppearance.AppCompat.Caption"/>
+    <style name="DeltaView" parent="TextAppearance.AppCompat.Body2"/>
 </resources>

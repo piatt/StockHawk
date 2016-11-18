@@ -7,18 +7,12 @@
     android:layout_marginBottom="@dimen/medium_margin"
     android:layout_marginStart="@dimen/standard_margin"
     android:layout_marginEnd="@dimen/standard_margin"
-    app:useDefaultMargins="true"
-    app:columnCount="5">
+    app:columnCount="4">
 
     <TextView
         android:id="@+id/symbol_view"
-        android:textAllCaps="true"
-        app:layout_gravity="start"/>
-
-    <TextView
-        android:id="@+id/exchange_view"
-        android:textAllCaps="true"
-        android:text="NASDAQ"/>
+        app:layout_gravity="start"
+        style="@style/SymbolView"/>
 
     <android.support.v4.widget.Space
         app:layout_gravity="fill"
@@ -28,20 +22,22 @@
     <TextView
         android:id="@+id/price_view"
         app:layout_gravity="end"
-        app:layout_columnSpan="2"/>
+        app:layout_columnSpan="2"
+        style="@style/PriceView"/>
 
     <TextView
         android:id="@+id/company_view"
         app:layout_gravity="start"
-        app:layout_columnSpan="2"
-        android:text="Google, Inc."/>
+        style="@style/CompanyView"/>
 
     <TextView
-        android:id="@+id/percent_delta_view"/>
+        android:id="@+id/percent_delta_view"
+        android:layout_marginEnd="@dimen/medium_margin"
+        app:layout_gravity="end"
+        style="@style/DeltaView"/>
 
     <TextView
         android:id="@+id/price_delta_view"
-        app:layout_gravity="end"
-        android:text="+34.90"/>
+        style="@style/DeltaView"/>
 
 </android.support.v7.widget.GridLayout>

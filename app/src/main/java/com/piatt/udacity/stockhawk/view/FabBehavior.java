@@ -1,4 +1,4 @@
-package com.piatt.udacity.stockhawk.ui;
+package com.piatt.udacity.stockhawk.view;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
@@ -7,7 +7,7 @@ import android.support.v13.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class FabBehavior extends CoordinatorLayout.Behavior<FloatingActionButton>  {
+public class FabBehavior extends FloatingActionButton.Behavior {
     public FabBehavior(Context context, AttributeSet attrs) {
         super();
     }
