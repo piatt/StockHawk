@@ -1,5 +1,6 @@
 package com.piatt.udacity.stockhawk.view;
 
+import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,7 +16,6 @@ import com.piatt.udacity.stockhawk.view.StocksAdapter.StockViewHolder;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindColor;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -58,8 +58,6 @@ public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
     }
 
     public class StockViewHolder extends RecyclerView.ViewHolder {
-        @BindColor(R.color.green) int positiveColor;
-        @BindColor(R.color.red) int negativeColor;
         @BindView(R.id.symbol_view) TextView symbolView;
         @BindView(R.id.company_view) TextView companyView;
         @BindView(R.id.price_view) TextView priceView;
@@ -78,7 +76,7 @@ public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
             priceView.setText(stock.getPrice());
             priceDeltaView.setText(stock.getPriceDelta());
             percentDeltaView.setText(stock.getPercentDelta());
-            int deltaColor = stock.hasPositiveDelta() ? positiveColor : negativeColor;
+            int deltaColor = stock.hasPositiveDelta() ? Color.GREEN : Color.RED;
             priceDeltaView.setTextColor(deltaColor);
             percentDeltaView.setTextColor(deltaColor);
         }

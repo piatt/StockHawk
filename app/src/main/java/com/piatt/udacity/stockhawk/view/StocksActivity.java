@@ -1,5 +1,6 @@
 package com.piatt.udacity.stockhawk.view;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -15,12 +16,13 @@ import android.widget.LinearLayout;
 import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerViewAdapter;
 import com.jakewharton.rxbinding.view.RxView;
 import com.piatt.udacity.stockhawk.R;
+import com.piatt.udacity.stockhawk.StocksApplication;
 import com.piatt.udacity.stockhawk.manager.ApiManager;
+import com.piatt.udacity.stockhawk.manager.PreferencesManager;
 import com.piatt.udacity.stockhawk.model.Stock;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -71,6 +73,8 @@ public class StocksActivity extends RxAppCompatActivity {
     }
 
     private void configureRefreshViews() {
+        refreshLayout.setColorSchemeColors(Color.WHITE);
+        refreshLayout.setProgressBackgroundColorSchemeResource(R.color.accent);
         refreshLayout.setOnRefreshListener(this::fetchStocks);
         RxView.clicks(refreshButton)
                 .compose(bindToLifecycle())
@@ -103,25 +107,15 @@ public class StocksActivity extends RxAppCompatActivity {
     }
 
     private void fetchStocks() {
-        List<String> symbols = Arrays.asList("AAPL", "MSFT", "YHOO", "TSLA", "GOOG");
-
-        if (ApiManager.getApiManager().isConnected(this)) {
+        if (StocksApplication.getApp().isNetworkAvailable()) {
+            Set<String> symbols = PreferencesManager.getManager().getSavedSymbols().get();
             Observable.from(symbols)
                     .doOnSubscribe(() -> {
                         if (!refreshLayout.isRefreshing()) {
                             refreshLayout.setRefreshing(true);
                         }
                     })
-                    .doOnNext(symbol -> {
-                        ApiManager.getApiManager().getQuote(symbol)
-                                .subscribe(stock -> {
-                                    if (stock.isValid()) {
-                                        stocksAdapter.addStock(stock);
-                                    }
-                                }, error -> {
-                                    Snackbar.make(messageLayout, R.string.error_message, Snackbar.LENGTH_LONG).show();
-                                });
-                    })
+                    .doOnNext(this::fetchStock)
                     .doOnCompleted(() -> {
                         refreshLayout.setRefreshing(false);
                         Snackbar.make(messageLayout, R.string.data_message, Snackbar.LENGTH_LONG).show();
@@ -130,8 +124,20 @@ public class StocksActivity extends RxAppCompatActivity {
                     .subscribe();
         }
         else {
-            Snackbar.make(messageLayout, R.string.data_message, Snackbar.LENGTH_LONG).show();
+            refreshLayout.setRefreshing(false);
+            Snackbar.make(messageLayout, R.string.connection_message, Snackbar.LENGTH_LONG).show();
         }
+    }
+
+    private void fetchStock(String symbol) {
+        ApiManager.getManager().getQuote(symbol)
+                .subscribe(stock -> {
+                    if (stock.isValid()) {
+                        stocksAdapter.addStock(stock);
+                    }
+                }, error -> {
+                    Snackbar.make(messageLayout, R.string.error_message, Snackbar.LENGTH_LONG).show();
+                });
     }
 
     private ItemTouchHelper.Callback stockItemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START | ItemTouchHelper.END) {
