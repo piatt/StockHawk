@@ -10,7 +10,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.widget.LinearLayout;
 
 import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerViewAdapter;
@@ -18,11 +17,11 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.piatt.udacity.stockhawk.R;
 import com.piatt.udacity.stockhawk.StocksApplication;
 import com.piatt.udacity.stockhawk.manager.ApiManager;
-import com.piatt.udacity.stockhawk.manager.PreferencesManager;
 import com.piatt.udacity.stockhawk.model.Stock;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
-import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -66,9 +65,12 @@ public class StocksActivity extends RxAppCompatActivity {
 
         RxRecyclerViewAdapter.dataChanges(stocksAdapter)
                 .compose(bindToLifecycle())
+                .filter(adapter -> adapter.getItemCount() == 0 || adapter.getItemCount() == 1)
                 .subscribe(adapter -> {
-                    boolean isEmpty = adapter.getItemCount() <= 0;
+                    boolean isEmpty = adapter.getItemCount() == 0;
                     RxView.visibility(messageLayout).call(isEmpty);
+                    RxView.visibility(refreshButton).call(!isEmpty);
+                    refreshLayout.setEnabled(!isEmpty);
                 });
     }
 
@@ -76,6 +78,7 @@ public class StocksActivity extends RxAppCompatActivity {
         refreshLayout.setColorSchemeColors(Color.WHITE);
         refreshLayout.setProgressBackgroundColorSchemeResource(R.color.accent);
         refreshLayout.setOnRefreshListener(this::fetchStocks);
+
         RxView.clicks(refreshButton)
                 .compose(bindToLifecycle())
                 .subscribe(click -> fetchStocks());
@@ -84,9 +87,7 @@ public class StocksActivity extends RxAppCompatActivity {
     private void configureAddButton() {
         RxView.clicks(addButton)
                 .compose(bindToLifecycle())
-                .subscribe(click -> {
-                    Log.d("TEST", "Add a stock!");
-                });
+                .subscribe(click -> new StockSearchDialog().show(getSupportFragmentManager(), StockSearchDialog.class.getName()));
 
 //        RxRecyclerView.scrollStateChanges(stocksView)
 //                .compose(bindToLifecycle())
@@ -108,7 +109,8 @@ public class StocksActivity extends RxAppCompatActivity {
 
     private void fetchStocks() {
         if (StocksApplication.getApp().isNetworkAvailable()) {
-            Set<String> symbols = PreferencesManager.getManager().getSavedSymbols().get();
+//            Set<String> symbols = PreferencesManager.getManager().getSavedSymbols().get();
+            List<String> symbols = Arrays.asList("YHOO", "TSLA", "MSFT", "GOOG");
             Observable.from(symbols)
                     .doOnSubscribe(() -> {
                         if (!refreshLayout.isRefreshing()) {
@@ -132,9 +134,7 @@ public class StocksActivity extends RxAppCompatActivity {
     private void fetchStock(String symbol) {
         ApiManager.getManager().getQuote(symbol)
                 .subscribe(stock -> {
-                    if (stock.isValid()) {
-                        stocksAdapter.addStock(stock);
-                    }
+                    stocksAdapter.addStock(stock);
                 }, error -> {
                     Snackbar.make(messageLayout, R.string.error_message, Snackbar.LENGTH_LONG).show();
                 });

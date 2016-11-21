@@ -2,6 +2,7 @@
     <dimen name="small_margin">4dp</dimen>
     <dimen name="medium_margin">8dp</dimen>
     <dimen name="standard_margin">16dp</dimen>
+    <dimen name="dialog_margin">24dp</dimen>
     <dimen name="large_margin">32dp</dimen>
     <dimen name="app_icon">64dp</dimen>
 </resources>

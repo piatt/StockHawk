@@ -74,7 +74,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/standard_margin"
-        android:src="@drawable/add_icon"
-        app:layout_behavior="com.piatt.udacity.stockhawk.view.FabBehavior"/>
+        android:src="@drawable/add_icon"/>
 
 </android.support.design.widget.CoordinatorLayout>
