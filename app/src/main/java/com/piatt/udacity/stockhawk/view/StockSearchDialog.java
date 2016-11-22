@@ -15,7 +15,7 @@ import com.jakewharton.rxbinding.widget.RxTextView;
 import com.piatt.udacity.stockhawk.R;
 import com.piatt.udacity.stockhawk.StocksApplication;
 import com.piatt.udacity.stockhawk.manager.ApiManager;
-import com.piatt.udacity.stockhawk.model.Stock;
+import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.trello.rxlifecycle.components.support.RxAppCompatDialogFragment;
 
 import java.util.Objects;
@@ -68,25 +68,24 @@ public class StockSearchDialog extends RxAppCompatDialogFragment {
                 })
                 .filter(Objects::nonNull)
                 .filter(stock -> {
-                    if (!stock.isValid()) {
+                    boolean valid = stock.isValid();
+                    if (!valid) {
                         searchLayout.setError(getString(R.string.invalid_message));
                     }
-                    return stock.isValid();
+                    return valid;
                 })
                 .filter(stock -> {
-                    // TODO: Return true only if stock not already added
-                    // if (!stock.isDuplicate()) {
-                    //    searchView.setError(getString(R.string.search_duplicate_error));
-                    // }
-                    return true;
+                    boolean duplicateStock = StorageManager.getManager().hasStock(stock);
+                    if (duplicateStock) {
+                        searchLayout.setError(getString(R.string.duplicate_message));
+                    }
+                    return !duplicateStock;
                 })
                 .doOnError(error -> searchLayout.setError(getString(R.string.error_message)))
                 .retry()
-                .subscribe(this::saveStock);
-    }
-
-    private void saveStock(Stock stock) {
-        ((StocksAdapter) ((StocksActivity) getActivity()).stocksView.getAdapter()).addStock(stock);
-        dismiss();
+                .subscribe(stock -> {
+                    StorageManager.getManager().addStock(stock);
+                    dismiss();
+                });
     }
 }

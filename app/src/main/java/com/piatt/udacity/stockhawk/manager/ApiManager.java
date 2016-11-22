@@ -16,7 +16,7 @@ public class ApiManager {
     private StocksApi stocksApi;
     @Getter static ApiManager manager = new ApiManager();
 
-    public ApiManager() {
+    private ApiManager() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(StocksApi.API_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())

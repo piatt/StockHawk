@@ -10,17 +10,21 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.widget.LinearLayout;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
+import com.jakewharton.rxbinding.support.design.widget.RxSnackbar;
 import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerViewAdapter;
 import com.jakewharton.rxbinding.view.RxView;
 import com.piatt.udacity.stockhawk.R;
 import com.piatt.udacity.stockhawk.StocksApplication;
 import com.piatt.udacity.stockhawk.manager.ApiManager;
+import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
-import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
@@ -51,6 +55,7 @@ public class StocksActivity extends RxAppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d("TEST", "onResume");
         fetchStocks();
     }
 
@@ -89,6 +94,13 @@ public class StocksActivity extends RxAppCompatActivity {
                 .compose(bindToLifecycle())
                 .subscribe(click -> new StockSearchDialog().show(getSupportFragmentManager(), StockSearchDialog.class.getName()));
 
+        StorageManager.getManager().getLastAddedStock()
+                .compose(bindToLifecycle())
+                .subscribe(stock -> {
+                    stocksAdapter.addOrUpdateStock(stock);
+                    stocksView.smoothScrollToPosition(stocksAdapter.getItemCount() - 1);
+                });
+
 //        RxRecyclerView.scrollStateChanges(stocksView)
 //                .compose(bindToLifecycle())
 //                .subscribe(state -> {
@@ -109,8 +121,9 @@ public class StocksActivity extends RxAppCompatActivity {
 
     private void fetchStocks() {
         if (StocksApplication.getApp().isNetworkAvailable()) {
-//            Set<String> symbols = PreferencesManager.getManager().getSavedSymbols().get();
-            List<String> symbols = Arrays.asList("YHOO", "TSLA", "MSFT", "GOOG");
+            List<String> symbols = Stream.of(StorageManager.getManager().getStocks())
+                    .map(Stock::getSymbol).collect(Collectors.toList());
+
             Observable.from(symbols)
                     .doOnSubscribe(() -> {
                         if (!refreshLayout.isRefreshing()) {
@@ -134,7 +147,7 @@ public class StocksActivity extends RxAppCompatActivity {
     private void fetchStock(String symbol) {
         ApiManager.getManager().getQuote(symbol)
                 .subscribe(stock -> {
-                    stocksAdapter.addStock(stock);
+                    stocksAdapter.addOrUpdateStock(stock);
                 }, error -> {
                     Snackbar.make(messageLayout, R.string.error_message, Snackbar.LENGTH_LONG).show();
                 });
@@ -150,8 +163,18 @@ public class StocksActivity extends RxAppCompatActivity {
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             int position = viewHolder.getAdapterPosition();
             Stock stock = stocksAdapter.removeStock(position);
-            Snackbar.make(messageLayout, getString(R.string.remove_message, stock.getSymbol()), Snackbar.LENGTH_LONG)
-                    .setAction(R.string.remove_action, view -> stocksAdapter.addStock(stock, position)).show();
+
+            Snackbar snackbar = Snackbar.make(messageLayout, getString(R.string.remove_message, stock.getSymbol()), Snackbar.LENGTH_LONG);
+            snackbar.setAction(R.string.remove_action, click -> stocksAdapter.addStock(stock, position));
+            snackbar.show();
+
+            RxSnackbar.dismisses(snackbar)
+                    .compose(bindToLifecycle())
+                    .subscribe(event -> {
+                        if (event != Snackbar.Callback.DISMISS_EVENT_ACTION) {
+                            StorageManager.getManager().removeStock(stock);
+                        }
+                    });
         }
     };
 }

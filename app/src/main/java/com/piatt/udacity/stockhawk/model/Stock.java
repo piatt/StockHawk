@@ -5,9 +5,11 @@ import com.google.gson.annotations.SerializedName;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+@EqualsAndHashCode(of = "symbol")
 public class Stock {
     @Getter @Setter @SerializedName("Symbol") String symbol;
     @Getter @Setter @SerializedName("Name") String company;

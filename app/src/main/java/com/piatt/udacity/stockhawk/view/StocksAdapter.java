@@ -22,21 +22,29 @@ import butterknife.ButterKnife;
 public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
     private List<Stock> stocks = new ArrayList<>();
 
-    public void addStock(Stock stock) {
-        stocks.add(stock);
-        // notifyItemInserted(stocks.size() - 1);
+    public void addOrUpdateStock(Stock stock) {
+        int position = stocks.indexOf(stock);
+        if (position == -1) {
+            stocks.add(stock);
+            notifyItemInserted(stocks.size() - 1);
+        } else {
+            notifyItemChanged(position, stock);
+        }
+        //TODO: Remove once https://github.com/JakeWharton/RxBinding/issues/310 is resolved
         notifyDataSetChanged();
     }
 
     public void addStock(Stock stock, int position) {
         stocks.add(position, stock);
-        // notifyItemInserted(position);
+        notifyItemInserted(position);
+        //TODO: Remove once https://github.com/JakeWharton/RxBinding/issues/310 is resolved
         notifyDataSetChanged();
     }
 
     public Stock removeStock(int position) {
         Stock stock = stocks.remove(position);
-        // notifyItemRemoved(position);
+        notifyItemRemoved(position);
+        //TODO: Remove once https://github.com/JakeWharton/RxBinding/issues/310 is resolved
         notifyDataSetChanged();
         return stock;
     }

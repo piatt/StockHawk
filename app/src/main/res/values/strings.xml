@@ -2,7 +2,7 @@
     <string name="app_name" translatable="false">Stock Hawk</string>
 
     <string name="empty_message_header">No Stocks Available</string>
-    <string name="empty_message_caption">Add a stock below to see it listed here.</string>
+    <string name="empty_message_caption">Add a stock below to see it listed here.\nSwipe away a stock to remove it.</string>
     <string name="data_message">You\'re all up to date!</string>
     <string name="error_message">Oops! Something went wrong. Please try again.</string>
     <string name="connection_message">Oops! You need a network connection to do that.</string>
