@@ -18,27 +18,27 @@ public class Stock {
     @Setter @SerializedName("ChangePercent") float percentDelta;
 
     public String getPrice() {
-        DecimalFormat decimalFormat = (DecimalFormat) NumberFormat.getInstance();
-        decimalFormat.setMinimumFractionDigits(2);
-        decimalFormat.setMaximumFractionDigits(2);
-        return decimalFormat.format(price);
+        DecimalFormat format = (DecimalFormat) NumberFormat.getInstance();
+        format.setMinimumFractionDigits(2);
+        format.setMaximumFractionDigits(2);
+        return format.format(price);
     }
 
     public String getPriceDelta() {
-        DecimalFormat decimalFormat = (DecimalFormat) NumberFormat.getInstance();
-        decimalFormat.setMinimumFractionDigits(2);
-        decimalFormat.setMaximumFractionDigits(2);
-        decimalFormat.setPositivePrefix("+");
-        return decimalFormat.format(priceDelta);
+        DecimalFormat format = (DecimalFormat) NumberFormat.getInstance();
+        format.setMinimumFractionDigits(2);
+        format.setMaximumFractionDigits(2);
+        format.setPositivePrefix("+");
+        return format.format(priceDelta);
     }
 
     public String getPercentDelta() {
-        DecimalFormat decimalFormat = (DecimalFormat) NumberFormat.getPercentInstance();
-        decimalFormat.setMultiplier(1);
-        decimalFormat.setMinimumFractionDigits(2);
-        decimalFormat.setMaximumFractionDigits(2);
-        decimalFormat.setPositivePrefix("+");
-        return decimalFormat.format(percentDelta);
+        DecimalFormat format = (DecimalFormat) NumberFormat.getPercentInstance();
+        format.setMultiplier(1);
+        format.setMinimumFractionDigits(2);
+        format.setMaximumFractionDigits(2);
+        format.setPositivePrefix("+");
+        return format.format(percentDelta);
     }
 
     public boolean hasPositiveDelta() {

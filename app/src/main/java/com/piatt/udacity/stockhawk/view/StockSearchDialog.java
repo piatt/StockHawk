@@ -13,7 +13,7 @@ import android.view.inputmethod.EditorInfo;
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.piatt.udacity.stockhawk.R;
-import com.piatt.udacity.stockhawk.StocksApplication;
+import com.piatt.udacity.stockhawk.StockHawkApplication;
 import com.piatt.udacity.stockhawk.manager.ApiManager;
 import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.trello.rxlifecycle.components.support.RxAppCompatDialogFragment;
@@ -51,16 +51,16 @@ public class StockSearchDialog extends RxAppCompatDialogFragment {
     }
 
     private void configureSearchActions() {
-        Observable<Void> addButtonObservable = RxView.clicks(addButton).compose(bindToLifecycle());
+        Observable<Void> addButtonObservable = RxView.clicks(addButton);
         Observable<Integer> searchViewObservable = RxTextView.editorActions(searchView)
-                .compose(bindToLifecycle())
                 .filter(actionId -> actionId == EditorInfo.IME_ACTION_DONE);
 
         Observable.merge(addButtonObservable, searchViewObservable)
+                .compose(bindToLifecycle())
                 .flatMap(action -> {
-                    if (StocksApplication.getApp().isNetworkAvailable()) {
+                    if (StockHawkApplication.getApp().isNetworkAvailable()) {
                         String symbol = searchView.getText().toString();
-                        return ApiManager.getManager().getQuote(symbol);
+                        return ApiManager.getManager().getStock(symbol);
                     } else {
                         searchLayout.setError(getString(R.string.connection_message));
                         return null;

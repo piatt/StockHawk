@@ -7,9 +7,9 @@ import android.net.NetworkInfo;
 
 import lombok.Getter;
 
-public class StocksApplication extends Application {
+public class StockHawkApplication extends Application {
     private ConnectivityManager connectivityManager;
-    @Getter static StocksApplication app;
+    @Getter static StockHawkApplication app;
 
     @Override
     public void onCreate() {

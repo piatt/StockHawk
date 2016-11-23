@@ -13,31 +13,31 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class ApiManager {
-    private StocksApi stocksApi;
+    private StockApi stockApi;
     @Getter static ApiManager manager = new ApiManager();
 
     private ApiManager() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(StocksApi.API_BASE_URL)
+                .baseUrl(StockApi.API_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
 
-        stocksApi = retrofit.create(StocksApi.class);
+        stockApi = retrofit.create(StockApi.class);
     }
 
-    public Observable<Stock> getQuote(String symbol) {
-        return stocksApi.getQuote(symbol)
+    public Observable<Stock> getStock(String symbol) {
+        return stockApi.getStock(symbol)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    private interface StocksApi {
+    private interface StockApi {
         String API_BASE_URL = "http://dev.markitondemand.com/MODApis/Api/v2/";
-        String API_ENDPOINT_QUOTE = "Quote/json";
+        String API_ENDPOINT_STOCK = "Quote/json";
         String API_PARAM_SYMBOL = "symbol";
 
-        @GET(API_ENDPOINT_QUOTE)
-        Observable<Stock> getQuote(@Query(API_PARAM_SYMBOL) String symbol);
+        @GET(API_ENDPOINT_STOCK)
+        Observable<Stock> getStock(@Query(API_PARAM_SYMBOL) String symbol);
     }
 }

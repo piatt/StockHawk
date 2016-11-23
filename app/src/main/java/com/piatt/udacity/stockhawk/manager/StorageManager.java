@@ -9,76 +9,106 @@ import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.piatt.udacity.stockhawk.StocksApplication;
+import com.piatt.udacity.stockhawk.StockHawkApplication;
 import com.piatt.udacity.stockhawk.model.Stock;
 
 import java.lang.reflect.Type;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import rx.Observable;
+import rx.subjects.PublishSubject;
 
 public class StorageManager {
-    private static final String PREF_TAG = "STOCK_HAWK";
-    private static final String PREF_STOCKS = "STOCKS";
+    private final String PREF_TAG = "STOCK_HAWK";
+    private final String PREF_STOCKS = "STOCKS";
+    private final int ADD_STOCK_EVENT = 0;
+    private final int UPDATE_STOCK_EVENT = 1;
+    private final int REMOVE_STOCK_EVENT = 2;
 
-    private Stock lastAddedStock;
-    private Preference<Set<Stock>> stockStorage;
+    private Preference<List<Stock>> stockStorage;
+    private PublishSubject<StockEvent> stockEventBus = PublishSubject.create();
     @Getter static StorageManager manager = new StorageManager();
 
     private StorageManager() {
-        SharedPreferences sharedPreferences = StocksApplication.getApp().getSharedPreferences(PREF_TAG, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = StockHawkApplication.getApp().getSharedPreferences(PREF_TAG, Context.MODE_PRIVATE);
         RxSharedPreferences rxSharedPreferences = RxSharedPreferences.create(sharedPreferences);
-        stockStorage = rxSharedPreferences.getObject(PREF_STOCKS, new LinkedHashSet<>(), new StockStorageAdapter());
+        stockStorage = rxSharedPreferences.getObject(PREF_STOCKS, new ArrayList<>(), new StockStorageAdapter());
     }
 
-    public Set<Stock> getStocks() {
+    public List<Stock> getStocks() {
         return stockStorage.get();
     }
 
     public boolean hasStock(Stock stock) {
-        return stockStorage.get().contains(stock);
+        return getStocks().contains(stock);
     }
 
     public void addStock(Stock stock) {
-        Set<Stock> stocks = stockStorage.get();
-        if (!hasStock(stock)) {
-            stocks.add(stock);
-            lastAddedStock = stock;
+        List<Stock> stocks = getStocks();
+        if (stocks.add(stock)) {
             stockStorage.set(stocks);
+            stockEventBus.onNext(new StockEvent(stock, ADD_STOCK_EVENT));
+        }
+    }
+
+    public void updateStock(Stock stock) {
+        List<Stock> stocks = getStocks();
+        if (stocks.remove(stock)) {
+            stocks.add(stock);
+            stockStorage.set(stocks);
+            stockEventBus.onNext(new StockEvent(stock, UPDATE_STOCK_EVENT));
         }
     }
 
     public void removeStock(Stock stock) {
-        Set<Stock> stocks = stockStorage.get();
-        if (hasStock(stock)) {
-            stocks.remove(stock);
-            lastAddedStock = null;
+        List<Stock> stocks = getStocks();
+        if (stocks.remove(stock)) {
             stockStorage.set(stocks);
+            stockEventBus.onNext(new StockEvent(stock, REMOVE_STOCK_EVENT));
         }
     }
 
-    public Observable<Stock> getLastAddedStock() {
-        return stockStorage.asObservable().filter(event -> lastAddedStock != null).map(event -> lastAddedStock);
+    public Observable<Stock> onStockAdded() {
+        return stockEventBus.filter(stockEvent -> stockEvent.getType() == ADD_STOCK_EVENT).map(StockEvent::getStock);
     }
 
-    private class StockStorageAdapter implements Preference.Adapter<Set<Stock>> {
+    public Observable<Stock> onStockUpdated() {
+        return stockEventBus.filter(stockEvent -> stockEvent.getType() == UPDATE_STOCK_EVENT).map(StockEvent::getStock);
+    }
+
+    public Observable<Stock> onStockRemoved() {
+        return stockEventBus.filter(stockEvent -> stockEvent.getType() == REMOVE_STOCK_EVENT).map(StockEvent::getStock);
+    }
+
+    public Observable<Integer> onSizeChanged() {
+        return Observable.merge(onStockAdded(), onStockRemoved()).map(stock -> getStocks().size()).startWith(getStocks().size());
+    }
+
+    @AllArgsConstructor
+    private class StockEvent {
+        @Getter Stock stock;
+        @Getter int type;
+    }
+
+    private class StockStorageAdapter implements Preference.Adapter<List<Stock>> {
         private final Gson gson;
         private final Type type;
 
         public StockStorageAdapter() {
             gson = new Gson();
-            type = new TypeToken<LinkedHashSet<Stock>>() {}.getType();
+            type = new TypeToken<ArrayList<Stock>>() {}.getType();
         }
 
         @Override
-        public Set<Stock> get(@NonNull String key, @NonNull SharedPreferences preferences) {
+        public List<Stock> get(@NonNull String key, @NonNull SharedPreferences preferences) {
             return gson.fromJson(preferences.getString(key, null), type);
         }
 
         @Override
-        public void set(@NonNull String key, @NonNull Set<Stock> stocks, @NonNull Editor editor) {
+        public void set(@NonNull String key, @NonNull List<Stock> stocks, @NonNull Editor editor) {
             editor.putString(key, gson.toJson(stocks));
         }
     }

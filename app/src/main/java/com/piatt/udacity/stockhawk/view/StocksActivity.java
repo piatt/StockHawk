@@ -13,19 +13,15 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.widget.LinearLayout;
 
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
 import com.jakewharton.rxbinding.support.design.widget.RxSnackbar;
-import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerViewAdapter;
+import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerView;
 import com.jakewharton.rxbinding.view.RxView;
 import com.piatt.udacity.stockhawk.R;
-import com.piatt.udacity.stockhawk.StocksApplication;
+import com.piatt.udacity.stockhawk.StockHawkApplication;
 import com.piatt.udacity.stockhawk.manager.ApiManager;
 import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,7 +35,8 @@ public class StocksActivity extends RxAppCompatActivity {
     @BindView(R.id.stocks_view) RecyclerView stocksView;
     @BindView(R.id.add_button) FloatingActionButton addButton;
 
-    private StocksAdapter stocksAdapter;
+    private StockAdapter stockAdapter;
+    private StorageManager storageManager = StorageManager.getManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,40 +50,47 @@ public class StocksActivity extends RxAppCompatActivity {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        Log.d("TEST", "onResume");
-        fetchStocks();
+    protected void onStart() {
+        super.onStart();
+        Log.d("TEST", "onStart");
+        updateStocks();
     }
 
     private void configureStocksView() {
-        stocksAdapter = new StocksAdapter();
+        stockAdapter = new StockAdapter();
         stocksView.setLayoutManager(new LinearLayoutManager(this));
         stocksView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-        stocksView.setAdapter(stocksAdapter);
+        stocksView.setAdapter(stockAdapter);
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(stockItemTouchHelperCallback);
         itemTouchHelper.attachToRecyclerView(stocksView);
 
-        RxRecyclerViewAdapter.dataChanges(stocksAdapter)
+        storageManager.onStockAdded()
                 .compose(bindToLifecycle())
-                .filter(adapter -> adapter.getItemCount() == 0 || adapter.getItemCount() == 1)
-                .subscribe(adapter -> {
-                    boolean isEmpty = adapter.getItemCount() == 0;
-                    RxView.visibility(messageLayout).call(isEmpty);
-                    RxView.visibility(refreshButton).call(!isEmpty);
-                    refreshLayout.setEnabled(!isEmpty);
+                .subscribe(stock -> {
+                    int lastPosition = stocksView.getAdapter().getItemCount() - 1;
+                    stocksView.smoothScrollToPosition(lastPosition);
                 });
     }
 
     private void configureRefreshViews() {
         refreshLayout.setColorSchemeColors(Color.WHITE);
         refreshLayout.setProgressBackgroundColorSchemeResource(R.color.accent);
-        refreshLayout.setOnRefreshListener(this::fetchStocks);
+        refreshLayout.setOnRefreshListener(this::updateStocks);
 
         RxView.clicks(refreshButton)
                 .compose(bindToLifecycle())
-                .subscribe(click -> fetchStocks());
+                .subscribe(click -> updateStocks());
+
+        storageManager.onSizeChanged()
+                .compose(bindToLifecycle())
+                .filter(size -> size == 0 || size == 1)
+                .subscribe(size -> {
+                    boolean isEmpty = size == 0;
+                    RxView.visibility(messageLayout).call(isEmpty);
+                    RxView.visibility(refreshButton).call(!isEmpty);
+                    refreshLayout.setEnabled(!isEmpty);
+                });
     }
 
     private void configureAddButton() {
@@ -94,60 +98,45 @@ public class StocksActivity extends RxAppCompatActivity {
                 .compose(bindToLifecycle())
                 .subscribe(click -> new StockSearchDialog().show(getSupportFragmentManager(), StockSearchDialog.class.getName()));
 
-        StorageManager.getManager().getLastAddedStock()
+        RxRecyclerView.scrollEvents(stocksView)
                 .compose(bindToLifecycle())
-                .subscribe(stock -> {
-                    stocksAdapter.addOrUpdateStock(stock);
-                    stocksView.smoothScrollToPosition(stocksAdapter.getItemCount() - 1);
+                .subscribe(event -> {
+                    if (event.dy() > 0) {
+                        addButton.hide();
+                    } else if (event.dy() <= 0) {
+                        addButton.show();
+                    }
                 });
-
-//        RxRecyclerView.scrollStateChanges(stocksView)
-//                .compose(bindToLifecycle())
-//                .subscribe(state -> {
-//                    switch (state) {
-//                        case SCROLL_STATE_IDLE: addButton.show();
-//                            break;
-//                        case SCROLL_STATE_DRAGGING: addButton.hide();
-//                            break;
-//                    }
-//                });
-
-//        RxRecyclerView.scrollEvents(stocksView)
-//                .compose(bindToLifecycle())
-//                .subscribe(state -> {
-//                    Log.d("TEST", "dy: " + state.dy());
-//                });
     }
 
-    private void fetchStocks() {
-        if (StocksApplication.getApp().isNetworkAvailable()) {
-            List<String> symbols = Stream.of(StorageManager.getManager().getStocks())
-                    .map(Stock::getSymbol).collect(Collectors.toList());
-
-            Observable.from(symbols)
+    private void updateStocks() {
+        if (StockHawkApplication.getApp().isNetworkAvailable()) {
+            Observable.from(storageManager.getStocks())
+                    .map(Stock::getSymbol)
                     .doOnSubscribe(() -> {
                         if (!refreshLayout.isRefreshing()) {
                             refreshLayout.setRefreshing(true);
                         }
                     })
-                    .doOnNext(this::fetchStock)
+                    .doOnNext(this::updateStock)
                     .doOnCompleted(() -> {
                         refreshLayout.setRefreshing(false);
-                        Snackbar.make(messageLayout, R.string.data_message, Snackbar.LENGTH_LONG).show();
+                        if (storageManager.getStocks().size() > 0) {
+                            Snackbar.make(messageLayout, R.string.data_message, Snackbar.LENGTH_LONG).show();
+                        }
                     })
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe();
-        }
-        else {
+        } else {
             refreshLayout.setRefreshing(false);
             Snackbar.make(messageLayout, R.string.connection_message, Snackbar.LENGTH_LONG).show();
         }
     }
 
-    private void fetchStock(String symbol) {
-        ApiManager.getManager().getQuote(symbol)
+    private void updateStock(String symbol) {
+        ApiManager.getManager().getStock(symbol)
                 .subscribe(stock -> {
-                    stocksAdapter.addOrUpdateStock(stock);
+                    storageManager.updateStock(stock);
                 }, error -> {
                     Snackbar.make(messageLayout, R.string.error_message, Snackbar.LENGTH_LONG).show();
                 });
@@ -162,10 +151,13 @@ public class StocksActivity extends RxAppCompatActivity {
         @Override
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             int position = viewHolder.getAdapterPosition();
-            Stock stock = stocksAdapter.removeStock(position);
+            Stock stock = stockAdapter.removeStock(position);
 
             Snackbar snackbar = Snackbar.make(messageLayout, getString(R.string.remove_message, stock.getSymbol()), Snackbar.LENGTH_LONG);
-            snackbar.setAction(R.string.remove_action, click -> stocksAdapter.addStock(stock, position));
+            snackbar.setAction(R.string.remove_action, click -> {
+                stockAdapter.addStock(stock, position);
+                stocksView.smoothScrollToPosition(position);
+            });
             snackbar.show();
 
             RxSnackbar.dismisses(snackbar)

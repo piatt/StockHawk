@@ -10,42 +10,46 @@ import android.widget.TextView;
 
 import com.jakewharton.rxbinding.view.RxView;
 import com.piatt.udacity.stockhawk.R;
+import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
-import com.piatt.udacity.stockhawk.view.StocksAdapter.StockViewHolder;
+import com.piatt.udacity.stockhawk.view.StockAdapter.StockViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import rx.Observable;
 
-public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
+public class StockAdapter extends RecyclerView.Adapter<StockViewHolder> {
     private List<Stock> stocks = new ArrayList<>();
 
-    public void addOrUpdateStock(Stock stock) {
+    public StockAdapter() {
+        StorageManager storageManager = StorageManager.getManager();
+        Observable.merge(storageManager.onStockAdded(), storageManager.onStockUpdated())
+                .subscribe(this::addOrUpdateStock);
+    }
+
+    private void addOrUpdateStock(Stock stock) {
         int position = stocks.indexOf(stock);
         if (position == -1) {
             stocks.add(stock);
-            notifyItemInserted(stocks.size() - 1);
+            notifyItemInserted(getItemCount() - 1);
         } else {
-            notifyItemChanged(position, stock);
+            stocks.remove(stock);
+            stocks.add(position, stock);
+            notifyItemChanged(position, null);
         }
-        //TODO: Remove once https://github.com/JakeWharton/RxBinding/issues/310 is resolved
-        notifyDataSetChanged();
     }
 
     public void addStock(Stock stock, int position) {
         stocks.add(position, stock);
         notifyItemInserted(position);
-        //TODO: Remove once https://github.com/JakeWharton/RxBinding/issues/310 is resolved
-        notifyDataSetChanged();
     }
 
     public Stock removeStock(int position) {
         Stock stock = stocks.remove(position);
         notifyItemRemoved(position);
-        //TODO: Remove once https://github.com/JakeWharton/RxBinding/issues/310 is resolved
-        notifyDataSetChanged();
         return stock;
     }
 
