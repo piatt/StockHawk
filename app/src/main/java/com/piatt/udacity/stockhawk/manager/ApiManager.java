@@ -1,13 +1,22 @@
 package com.piatt.udacity.stockhawk.manager;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.piatt.udacity.stockhawk.model.Stock;
+import com.piatt.udacity.stockhawk.model.StockResponse;
+import com.piatt.udacity.stockhawk.model.StocksResponse;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import lombok.Getter;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
-import retrofit2.http.Query;
+import retrofit2.http.QueryMap;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -27,17 +36,47 @@ public class ApiManager {
     }
 
     public Observable<Stock> getStock(String symbol) {
-        return stockApi.getStock(symbol)
+        List<String> symbols = Collections.singletonList(symbol);
+        return stockApi.getStock(getStockQueryMap(symbols))
+                .map(StockResponse::getStock)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    private interface StockApi {
-        String API_BASE_URL = "http://dev.markitondemand.com/MODApis/Api/v2/";
-        String API_ENDPOINT_STOCK = "Quote/json";
-        String API_PARAM_SYMBOL = "symbol";
+    public Observable<List<Stock>> getStocks(List<String> symbols) {
+        return stockApi.getStocks(getStockQueryMap(symbols))
+                .map(StocksResponse::getStocks)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
 
-        @GET(API_ENDPOINT_STOCK)
-        Observable<Stock> getStock(@Query(API_PARAM_SYMBOL) String symbol);
+    private Map<String, String> getStockQueryMap(List<String> symbols) {
+        String formattedSymbols = Stream.of(symbols)
+                .map(symbol -> String.format("'%s'", symbol))
+                .collect(Collectors.joining(","));
+
+        Map<String, String> queryMap = new HashMap<>();
+        queryMap.put(StockApi.API_QUERY_KEY, String.format(StockApi.API_QUERY_VALUE, formattedSymbols));
+        queryMap.put(StockApi.API_FORMAT_KEY, StockApi.API_FORMAT_VALUE);
+        queryMap.put(StockApi.API_ENVIRONMENT_KEY, StockApi.API_ENVIRONMENT_VALUE);
+
+        return queryMap;
+    }
+
+    private interface StockApi {
+        String API_BASE_URL = "https://query.yahooapis.com/v1/public/";
+        String API_QUERY_ENDPOINT = "yql";
+        String API_QUERY_KEY = "q";
+        String API_QUERY_VALUE = "select * from yahoo.finance.quotes where symbol in (%s)";
+        String API_FORMAT_KEY = "format";
+        String API_FORMAT_VALUE = "json";
+        String API_ENVIRONMENT_KEY = "env";
+        String API_ENVIRONMENT_VALUE = "store://datatables.org/alltableswithkeys";
+
+        @GET(API_QUERY_ENDPOINT)
+        Observable<StockResponse> getStock(@QueryMap Map<String, String> stockQueryMap);
+
+        @GET(API_QUERY_ENDPOINT)
+        Observable<StocksResponse> getStocks(@QueryMap Map<String, String> stockQueryMap);
     }
 }

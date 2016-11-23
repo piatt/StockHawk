@@ -71,7 +71,7 @@ public class StockAdapter extends RecyclerView.Adapter<StockViewHolder> {
 
     public class StockViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.symbol_view) TextView symbolView;
-        @BindView(R.id.company_view) TextView companyView;
+        @BindView(R.id.name_view) TextView nameView;
         @BindView(R.id.price_view) TextView priceView;
         @BindView(R.id.price_delta_view) TextView priceDeltaView;
         @BindView(R.id.percent_delta_view) TextView percentDeltaView;
@@ -84,7 +84,7 @@ public class StockAdapter extends RecyclerView.Adapter<StockViewHolder> {
 
         public void onBind(Stock stock) {
             symbolView.setText(stock.getSymbol());
-            companyView.setText(stock.getCompany());
+            nameView.setText(stock.getName());
             priceView.setText(stock.getPrice());
             priceDeltaView.setText(stock.getPriceDelta());
             percentDeltaView.setText(stock.getPercentDelta());

@@ -26,7 +26,7 @@
     <style name="SymbolView" parent="TextAppearance.AppCompat.Display1">
         <item name="android:textAllCaps">true</item>
     </style>
+    <style name="NameView" parent="TextAppearance.AppCompat.Caption"/>
     <style name="PriceView" parent="TextAppearance.AppCompat.Display1"/>
-    <style name="CompanyView" parent="TextAppearance.AppCompat.Caption"/>
     <style name="DeltaView" parent="TextAppearance.AppCompat.Body2"/>
 </resources>

@@ -10,7 +10,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.widget.LinearLayout;
 
 import com.jakewharton.rxbinding.support.design.widget.RxSnackbar;
@@ -52,7 +51,6 @@ public class StocksActivity extends RxAppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d("TEST", "onStart");
         updateStocks();
     }
 

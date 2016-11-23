@@ -26,9 +26,9 @@
         style="@style/PriceView"/>
 
     <TextView
-        android:id="@+id/company_view"
+        android:id="@+id/name_view"
         app:layout_gravity="start"
-        style="@style/CompanyView"/>
+        style="@style/NameView"/>
 
     <TextView
         android:id="@+id/price_delta_view"
