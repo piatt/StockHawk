@@ -12,7 +12,7 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.piatt.udacity.stockhawk.R;
 import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
-import com.piatt.udacity.stockhawk.view.StockAdapter.StockViewHolder;
+import com.piatt.udacity.stockhawk.view.StocksAdapter.StockViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +21,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
 
-public class StockAdapter extends RecyclerView.Adapter<StockViewHolder> {
+public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
     private List<Stock> stocks = new ArrayList<>();
 
-    public StockAdapter() {
+    public StocksAdapter() {
         StorageManager storageManager = StorageManager.getManager();
         Observable.merge(storageManager.onStockAdded(), storageManager.onStockUpdated())
                 .subscribe(this::addOrUpdateStock);

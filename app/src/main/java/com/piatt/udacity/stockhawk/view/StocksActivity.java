@@ -6,12 +6,13 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.AppCompatImageButton;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.widget.LinearLayout;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.jakewharton.rxbinding.support.design.widget.RxSnackbar;
 import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerView;
 import com.jakewharton.rxbinding.view.RxView;
@@ -22,10 +23,10 @@ import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 
 public class StocksActivity extends RxAppCompatActivity {
     @BindView(R.id.refresh_button) AppCompatImageButton refreshButton;
@@ -34,7 +35,7 @@ public class StocksActivity extends RxAppCompatActivity {
     @BindView(R.id.stocks_view) RecyclerView stocksView;
     @BindView(R.id.add_button) FloatingActionButton addButton;
 
-    private StockAdapter stockAdapter;
+    private StocksAdapter stocksAdapter;
     private StorageManager storageManager = StorageManager.getManager();
 
     @Override
@@ -55,10 +56,9 @@ public class StocksActivity extends RxAppCompatActivity {
     }
 
     private void configureStocksView() {
-        stockAdapter = new StockAdapter();
+        stocksAdapter = new StocksAdapter();
         stocksView.setLayoutManager(new LinearLayoutManager(this));
-        stocksView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-        stocksView.setAdapter(stockAdapter);
+        stocksView.setAdapter(stocksAdapter);
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(stockItemTouchHelperCallback);
         itemTouchHelper.attachToRecyclerView(stocksView);
@@ -109,35 +109,29 @@ public class StocksActivity extends RxAppCompatActivity {
 
     private void updateStocks() {
         if (StockHawkApplication.getApp().isNetworkAvailable()) {
-            Observable.from(storageManager.getStocks())
+            List<String> symbols = Stream.of(storageManager.getStocks())
                     .map(Stock::getSymbol)
+                    .collect(Collectors.toList());
+
+            ApiManager.getManager().getStocks(symbols)
                     .doOnSubscribe(() -> {
                         if (!refreshLayout.isRefreshing()) {
                             refreshLayout.setRefreshing(true);
                         }
                     })
-                    .doOnNext(this::updateStock)
+                    .doOnNext(stocks -> storageManager.updateStocks(stocks))
+                    .doOnError(error -> Snackbar.make(messageLayout, R.string.error_message, Snackbar.LENGTH_LONG).show())
                     .doOnCompleted(() -> {
                         refreshLayout.setRefreshing(false);
                         if (storageManager.getStocks().size() > 0) {
                             Snackbar.make(messageLayout, R.string.data_message, Snackbar.LENGTH_LONG).show();
                         }
                     })
-                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe();
         } else {
             refreshLayout.setRefreshing(false);
             Snackbar.make(messageLayout, R.string.connection_message, Snackbar.LENGTH_LONG).show();
         }
-    }
-
-    private void updateStock(String symbol) {
-        ApiManager.getManager().getStock(symbol)
-                .subscribe(stock -> {
-                    storageManager.updateStock(stock);
-                }, error -> {
-                    Snackbar.make(messageLayout, R.string.error_message, Snackbar.LENGTH_LONG).show();
-                });
     }
 
     private ItemTouchHelper.Callback stockItemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START | ItemTouchHelper.END) {
@@ -149,11 +143,11 @@ public class StocksActivity extends RxAppCompatActivity {
         @Override
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             int position = viewHolder.getAdapterPosition();
-            Stock stock = stockAdapter.removeStock(position);
+            Stock stock = stocksAdapter.removeStock(position);
 
             Snackbar snackbar = Snackbar.make(messageLayout, getString(R.string.remove_message, stock.getSymbol()), Snackbar.LENGTH_LONG);
             snackbar.setAction(R.string.remove_action, click -> {
-                stockAdapter.addStock(stock, position);
+                stocksAdapter.addStock(stock, position);
                 stocksView.smoothScrollToPosition(position);
             });
             snackbar.show();

@@ -19,29 +19,28 @@ public class Stock {
     @Setter @SerializedName("Change") String priceDelta;
     @Setter @SerializedName("PercentChange") String percentDelta;
 
-    private final String DELTA_PATTERN = "([+-]*)(\\d+\\.\\d+)(%*)";
-    private final Pattern pattern;
+    private transient final String DELTA_PATTERN = "([+-]*)(\\d+\\.\\d+)(%*)";
+    private transient final DecimalFormat decimalFormat;
+    private transient final Pattern pattern;
 
     public Stock() {
+        decimalFormat = (DecimalFormat) NumberFormat.getInstance();
+        decimalFormat.setMinimumFractionDigits(2);
+        decimalFormat.setMaximumFractionDigits(2);
         pattern = Pattern.compile(DELTA_PATTERN);
     }
 
     public String getPrice() {
-        DecimalFormat decimalFormat = (DecimalFormat) NumberFormat.getInstance();
-        decimalFormat.setMinimumFractionDigits(2);
-        decimalFormat.setMaximumFractionDigits(2);
-        return decimalFormat.format(Float.parseFloat(price));
+        return price != null ? decimalFormat.format(Float.parseFloat(price)) : price;
     }
 
     public String getPriceDelta() {
         if (priceDelta != null) {
             Matcher matcher = pattern.matcher(priceDelta);
             if (matcher.find()) {
-                DecimalFormat decimalFormat = (DecimalFormat) NumberFormat.getInstance();
-                decimalFormat.setMinimumFractionDigits(2);
-                decimalFormat.setMaximumFractionDigits(2);
-                return matcher.group(1)
-                        .concat(decimalFormat.format(Float.parseFloat(matcher.group(2))));
+                String sign = matcher.group(1);
+                float number = Float.parseFloat(matcher.group(2));
+                return sign.concat(decimalFormat.format(number));
             }
         }
         return priceDelta;
@@ -51,12 +50,10 @@ public class Stock {
         if (percentDelta != null) {
             Matcher matcher = pattern.matcher(percentDelta);
             if (matcher.find()) {
-                DecimalFormat decimalFormat = (DecimalFormat) NumberFormat.getInstance();
-                decimalFormat.setMinimumFractionDigits(2);
-                decimalFormat.setMaximumFractionDigits(2);
-                return matcher.group(1)
-                        .concat(decimalFormat.format(Float.parseFloat(matcher.group(2))))
-                        .concat(matcher.group(3));
+                String sign = matcher.group(1);
+                float number = Float.parseFloat(matcher.group(2));
+                String percent = matcher.group(3);
+                return sign.concat(decimalFormat.format(number)).concat(percent);
             }
         }
         return percentDelta;

@@ -54,13 +54,17 @@ public class StorageManager {
         }
     }
 
-    public void updateStock(Stock stock) {
+    public void updateStocks(List<Stock> updatedStocks) {
         List<Stock> stocks = getStocks();
-        if (stocks.remove(stock)) {
-            stocks.add(stock);
-            stockStorage.set(stocks);
-            stockEventBus.onNext(new StockEvent(stock, UPDATE_STOCK_EVENT));
-        }
+        Observable.from(updatedStocks)
+                .doOnNext(stock -> {
+                    if (stocks.remove(stock)) {
+                        stocks.add(stock);
+                        stockEventBus.onNext(new StockEvent(stock, UPDATE_STOCK_EVENT));
+                    }
+                })
+                .doOnCompleted(() -> stockStorage.set(stocks))
+                .subscribe();
     }
 
     public void removeStock(Stock stock) {
