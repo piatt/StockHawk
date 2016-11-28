@@ -11,29 +11,30 @@
 
     <TextView
         android:id="@+id/symbol_view"
-        app:layout_gravity="start"
+        app:layout_column="0"
         style="@style/SymbolView"/>
 
     <android.support.v4.widget.Space
-        app:layout_gravity="fill"
         app:layout_columnWeight="1"
         app:layout_rowSpan="2"/>
 
     <TextView
         android:id="@+id/price_view"
-        app:layout_gravity="end"
+        android:gravity="end"
+        app:layout_gravity="fill_horizontal"
         app:layout_columnSpan="2"
         style="@style/PriceView"/>
 
     <TextView
         android:id="@+id/name_view"
-        app:layout_gravity="start"
+        app:layout_column="0"
         style="@style/NameView"/>
 
     <TextView
         android:id="@+id/price_delta_view"
         android:layout_marginEnd="@dimen/medium_margin"
-        app:layout_gravity="end"
+        android:gravity="end"
+        app:layout_gravity="fill_horizontal"
         style="@style/DeltaView"/>
 
     <TextView
