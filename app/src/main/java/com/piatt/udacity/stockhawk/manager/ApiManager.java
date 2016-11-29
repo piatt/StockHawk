@@ -23,7 +23,7 @@ import rx.schedulers.Schedulers;
 
 public class ApiManager {
     private StockApi stockApi;
-    @Getter static ApiManager manager = new ApiManager();
+    @Getter private static ApiManager manager = new ApiManager();
 
     private ApiManager() {
         Retrofit retrofit = new Retrofit.Builder()
@@ -45,6 +45,7 @@ public class ApiManager {
 
     public Observable<List<Stock>> getStocks(List<String> symbols) {
         return stockApi.getStocks(getStockQueryMap(symbols))
+                .doOnNext(stocksResponse -> StorageManager.getManager().setTimestamp(stocksResponse.getTimestamp()))
                 .map(StocksResponse::getStocks)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

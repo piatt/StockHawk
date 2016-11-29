@@ -9,7 +9,7 @@ import lombok.Getter;
 
 public class StockHawkApplication extends Application {
     private ConnectivityManager connectivityManager;
-    @Getter static StockHawkApplication app;
+    @Getter private static StockHawkApplication app;
 
     @Override
     public void onCreate() {

@@ -1,8 +1,8 @@
 <resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Stock Hawk</string>
 
-    <string name="empty_message_header">No Stocks Available</string>
-    <string name="empty_message_caption">Add a stock below to see it listed here.\nSwipe away a stock to remove it.</string>
+    <string name="empty_message">No Stocks Available</string>
+    <string name="instruction_message">Add a stock below to see it listed here.\nSwipe away a stock to remove it.</string>
     <string name="data_message">You\'re all up to date!</string>
     <string name="error_message">Oops! Something went wrong. Please try again.</string>
     <string name="connection_message">Oops! You need a network connection to do that.</string>
@@ -10,6 +10,7 @@
     <string name="duplicate_message">You\'ve already added this one.</string>
     <string name="invalid_message">You\'ve entered an invalid stock symbol.</string>
     <string name="remove_message">You\'ve just removed <xliff:g id="stock">%1$s</xliff:g>.</string>
+    <string name="timestamp_message">Last updated: <xliff:g id="timestamp">%1$s</xliff:g></string>
 
     <string name="add_action">ADD</string>
     <string name="remove_action">UNDO</string>

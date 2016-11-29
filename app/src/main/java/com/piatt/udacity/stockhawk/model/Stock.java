@@ -13,11 +13,23 @@ import lombok.Setter;
 
 @EqualsAndHashCode(of = "symbol")
 public class Stock {
-    @Getter @Setter @SerializedName("Symbol") String symbol;
-    @Getter @Setter @SerializedName("Name") String name;
-    @Setter @SerializedName("LastTradePriceOnly") String price;
-    @Setter @SerializedName("Change") String priceDelta;
-    @Setter @SerializedName("PercentChange") String percentDelta;
+    @Getter @SerializedName("Symbol") private String symbol;
+    @Getter @SerializedName("Name") private String name;
+    @SerializedName("LastTradePriceOnly") private String price;
+    @SerializedName("Change") private String priceDelta;
+    @SerializedName("PercentChange") private String percentDelta;
+    @SerializedName("Open") private String open;
+    @SerializedName("PreviousClose") private String close;
+    @SerializedName("DaysLow") private String dayLow;
+    @SerializedName("DaysHigh") private String dayHigh;
+    @SerializedName("YearLow") private String yearLow;
+    @SerializedName("YearHigh") private String yearHigh;
+    @SerializedName("MarketCapitalization") private String marketCap;
+    @SerializedName("Volume") private String volume;
+    @SerializedName("AverageDailyVolume") private String averageVolume;
+    @SerializedName("EPSEstimateCurrentYear") private String eps;
+    @SerializedName("PEGRatio") private String pegRatio;
+    @Getter @Setter private String timestamp;
 
     private transient final String DELTA_PATTERN = "([+-]*)(\\d+\\.\\d+)(%*)";
     private transient final DecimalFormat decimalFormat;
@@ -58,7 +70,6 @@ public class Stock {
         }
         return percentDelta;
     }
-
 
     public boolean hasPositiveDelta() {
         return priceDelta != null && Float.parseFloat(priceDelta) >= 0;

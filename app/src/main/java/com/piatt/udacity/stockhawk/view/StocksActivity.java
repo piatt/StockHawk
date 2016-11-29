@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -29,6 +30,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class StocksActivity extends RxAppCompatActivity {
+    @BindView(R.id.timestamp_view) TextView timestampView;
     @BindView(R.id.refresh_button) AppCompatImageButton refreshButton;
     @BindView(R.id.refresh_layout) SwipeRefreshLayout refreshLayout;
     @BindView(R.id.message_layout) LinearLayout messageLayout;
@@ -89,6 +91,10 @@ public class StocksActivity extends RxAppCompatActivity {
                     RxView.visibility(refreshButton).call(!isEmpty);
                     refreshLayout.setEnabled(!isEmpty);
                 });
+
+        storageManager.onTimestampChanged()
+                .compose(bindToLifecycle())
+                .subscribe(timestamp -> timestampView.setText(getString(R.string.timestamp_message, timestamp)));
     }
 
     private void configureAddButton() {
@@ -114,6 +120,7 @@ public class StocksActivity extends RxAppCompatActivity {
                     .collect(Collectors.toList());
 
             ApiManager.getManager().getStocks(symbols)
+                    .compose(bindToLifecycle())
                     .doOnSubscribe(() -> {
                         if (!refreshLayout.isRefreshing()) {
                             refreshLayout.setRefreshing(true);

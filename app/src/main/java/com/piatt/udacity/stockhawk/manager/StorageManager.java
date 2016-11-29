@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.support.annotation.NonNull;
 
+import com.annimon.stream.Stream;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
@@ -23,19 +24,26 @@ import rx.subjects.PublishSubject;
 
 public class StorageManager {
     private final String PREF_TAG = "STOCK_HAWK";
+    private final String PREF_TIMESTAMP = "TIMESTAMP";
     private final String PREF_STOCKS = "STOCKS";
     private final int ADD_STOCK_EVENT = 0;
     private final int UPDATE_STOCK_EVENT = 1;
     private final int REMOVE_STOCK_EVENT = 2;
 
+    private Preference<String> timestamp;
     private Preference<List<Stock>> stockStorage;
     private PublishSubject<StockEvent> stockEventBus = PublishSubject.create();
-    @Getter static StorageManager manager = new StorageManager();
+    @Getter private static StorageManager manager = new StorageManager();
 
     private StorageManager() {
         SharedPreferences sharedPreferences = StockHawkApplication.getApp().getSharedPreferences(PREF_TAG, Context.MODE_PRIVATE);
         RxSharedPreferences rxSharedPreferences = RxSharedPreferences.create(sharedPreferences);
+        timestamp = rxSharedPreferences.getString(PREF_TIMESTAMP);
         stockStorage = rxSharedPreferences.getObject(PREF_STOCKS, new ArrayList<>(), new StockStorageAdapter());
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp.set(timestamp);
     }
 
     public List<Stock> getStocks() {
@@ -56,15 +64,13 @@ public class StorageManager {
 
     public void updateStocks(List<Stock> updatedStocks) {
         List<Stock> stocks = getStocks();
-        Observable.from(updatedStocks)
-                .doOnNext(stock -> {
-                    if (stocks.remove(stock)) {
-                        stocks.add(stock);
-                        stockEventBus.onNext(new StockEvent(stock, UPDATE_STOCK_EVENT));
-                    }
-                })
-                .doOnCompleted(() -> stockStorage.set(stocks))
-                .subscribe();
+        Stream.of(updatedStocks).forEach(stock -> {
+            if (stocks.remove(stock)) {
+                stocks.add(stock);
+                stockEventBus.onNext(new StockEvent(stock, UPDATE_STOCK_EVENT));
+            }
+        });
+        stockStorage.set(stocks);
     }
 
     public void removeStock(Stock stock) {
@@ -91,10 +97,14 @@ public class StorageManager {
         return Observable.merge(onStockAdded(), onStockRemoved()).map(stock -> getStocks().size()).startWith(getStocks().size());
     }
 
+    public Observable<String> onTimestampChanged() {
+        return timestamp.asObservable();
+    }
+
     @AllArgsConstructor
     private class StockEvent {
-        @Getter Stock stock;
-        @Getter int type;
+        @Getter private Stock stock;
+        @Getter private int type;
     }
 
     private class StockStorageAdapter implements Preference.Adapter<List<Stock>> {
