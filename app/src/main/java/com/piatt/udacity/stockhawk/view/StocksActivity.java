@@ -88,6 +88,7 @@ public class StocksActivity extends RxAppCompatActivity {
                 .subscribe(size -> {
                     boolean isEmpty = size == 0;
                     RxView.visibility(messageLayout).call(isEmpty);
+                    RxView.visibility(timestampView).call(!isEmpty);
                     RxView.visibility(refreshButton).call(!isEmpty);
                     refreshLayout.setEnabled(!isEmpty);
                 });

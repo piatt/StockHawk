@@ -44,9 +44,20 @@ public class ApiManager {
     }
 
     public Observable<List<Stock>> getStocks(List<String> symbols) {
-        return stockApi.getStocks(getStockQueryMap(symbols))
-                .doOnNext(stocksResponse -> StorageManager.getManager().setTimestamp(stocksResponse.getTimestamp()))
-                .map(StocksResponse::getStocks)
+        Observable<List<Stock>> stocksObservable;
+
+        if (symbols.size() == 1) {
+            stocksObservable = stockApi.getStock(getStockQueryMap(symbols))
+                    .doOnNext(stockResponse -> StorageManager.getManager().setTimestamp(stockResponse.getTimestamp()))
+                    .map(StockResponse::getStock)
+                    .toList();
+        } else {
+            stocksObservable = stockApi.getStocks(getStockQueryMap(symbols))
+                    .doOnNext(stocksResponse -> StorageManager.getManager().setTimestamp(stocksResponse.getTimestamp()))
+                    .map(StocksResponse::getStocks);
+        }
+
+        return stocksObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

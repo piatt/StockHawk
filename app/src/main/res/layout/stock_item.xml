@@ -15,6 +15,7 @@
         style="@style/SymbolView"/>
 
     <android.support.v4.widget.Space
+        app:layout_gravity="fill"
         app:layout_columnWeight="1"
         app:layout_rowSpan="2"/>
 

@@ -12,10 +12,14 @@ public class StockResponse {
     private transient final String TIMESTAMP_FORMAT = "E h:mm a";
 
     public Stock getStock() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(TIMESTAMP_FORMAT);
         Stock stock = query.getResults().getStock();
-        stock.setTimestamp(simpleDateFormat.format(query.getTimestamp()));
+        stock.setTimestamp(getTimestamp());
         return stock;
+    }
+
+    public String getTimestamp() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(TIMESTAMP_FORMAT);
+        return simpleDateFormat.format(query.getTimestamp());
     }
 
     private class StockQuery {
