@@ -2,6 +2,7 @@ package com.piatt.udacity.stockhawk.view;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -39,6 +40,7 @@ public class StocksActivity extends RxAppCompatActivity {
 
     private StocksAdapter stocksAdapter;
     private StorageManager storageManager = StorageManager.getManager();
+    private final String STOCK_VIEW_STATE = "STOCK_VIEW_STATE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,19 +48,35 @@ public class StocksActivity extends RxAppCompatActivity {
         setContentView(R.layout.stocks_activity);
         ButterKnife.bind(this);
 
-        configureStocksView();
+        boolean hasState = savedInstanceState != null;
+        configureStocksView(hasState);
         configureRefreshViews();
         configureAddButton();
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        updateStocks();
+    protected void onSaveInstanceState(Bundle outState) {
+        Parcelable stockViewState = stocksView.getLayoutManager().onSaveInstanceState();
+        outState.putParcelable(STOCK_VIEW_STATE, stockViewState);
+        super.onSaveInstanceState(outState);
     }
 
-    private void configureStocksView() {
-        stocksAdapter = new StocksAdapter();
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.containsKey(STOCK_VIEW_STATE)) {
+            Parcelable stockViewState = savedInstanceState.getParcelable(STOCK_VIEW_STATE);
+            stocksView.getLayoutManager().onRestoreInstanceState(stockViewState);
+        }
+    }
+
+    private void configureStocksView(boolean hasState) {
+        if (hasState) {
+            stocksAdapter = new StocksAdapter(storageManager.getStocks());
+        } else {
+            stocksAdapter = new StocksAdapter();
+            updateStocks();
+        }
         stocksView.setLayoutManager(new LinearLayoutManager(this));
         stocksView.setAdapter(stocksAdapter);
 

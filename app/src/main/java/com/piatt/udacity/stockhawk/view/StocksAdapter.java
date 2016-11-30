@@ -22,9 +22,16 @@ import butterknife.ButterKnife;
 import rx.Observable;
 
 public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
-    private List<Stock> stocks = new ArrayList<>();
+    private List<Stock> stocks;
 
     public StocksAdapter() {
+        this(new ArrayList<>());
+    }
+
+    public StocksAdapter(List<Stock> stocks) {
+        this.stocks = stocks;
+        notifyDataSetChanged();
+
         StorageManager storageManager = StorageManager.getManager();
         Observable.merge(storageManager.onStockAdded(), storageManager.onStockUpdated())
                 .subscribe(this::addOrUpdateStock);
