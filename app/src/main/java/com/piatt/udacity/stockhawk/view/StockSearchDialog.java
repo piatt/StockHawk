@@ -8,6 +8,7 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.AppCompatButton;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 
 import com.jakewharton.rxbinding.view.RxView;
@@ -43,6 +44,12 @@ public class StockSearchDialog extends RxAppCompatDialogFragment {
                 .create();
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getDialog().getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+    }
+
     private void configureSearchView() {
         RxTextView.textChanges(searchView)
                 .compose(bindToLifecycle())
@@ -57,6 +64,7 @@ public class StockSearchDialog extends RxAppCompatDialogFragment {
 
         Observable.merge(addButtonObservable, searchViewObservable)
                 .compose(bindToLifecycle())
+                .filter(actionId -> searchView.getText().length() > 0)
                 .flatMap(action -> {
                     if (StockHawkApplication.getApp().isNetworkAvailable()) {
                         String symbol = searchView.getText().toString();
