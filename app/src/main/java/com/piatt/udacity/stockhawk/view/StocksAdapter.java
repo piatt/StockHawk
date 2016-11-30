@@ -17,6 +17,7 @@ import com.piatt.udacity.stockhawk.view.StocksAdapter.StockViewHolder;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
@@ -82,6 +83,7 @@ public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
         @BindView(R.id.price_view) TextView priceView;
         @BindView(R.id.price_delta_view) TextView priceDeltaView;
         @BindView(R.id.percent_delta_view) TextView percentDeltaView;
+        @BindString(R.string.stock_item_message) String stockItemMessage;
 
         public StockViewHolder(View itemView) {
             super(itemView);
@@ -98,6 +100,11 @@ public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
             int deltaColor = stock.hasPositiveDelta() ? Color.GREEN : Color.RED;
             priceDeltaView.setTextColor(deltaColor);
             percentDeltaView.setTextColor(deltaColor);
+            itemView.setContentDescription(getContentDescription(stock));
+        }
+
+        private String getContentDescription(Stock stock) {
+            return String.format(stockItemMessage, stock.getSymbol(), stock.getName(), stock.getPrice(), stock.getPriceDelta(), stock.getPercentDelta());
         }
 
         private void onClick() {

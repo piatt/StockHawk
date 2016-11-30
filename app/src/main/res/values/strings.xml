@@ -17,4 +17,10 @@
 
     <string name="search_title">Stock Search</string>
     <string name="search_hint">AAPL</string>
+
+    <string name="refresh_button_message">Click here to refresh all stocks.</string>
+    <string name="add_button_message">Click here to add a stock.</string>
+    <string name="stock_item_message"><xliff:g id="symbol">%1$s</xliff:g> for <xliff:g id="name">%2$s</xliff:g> is currently trading at
+        <xliff:g id="price">%3$s</xliff:g>, for a change of <xliff:g id="priceDelta">%4$s</xliff:g> and <xliff:g id="percentDelta">%5$s</xliff:g>.</string>
+
 </resources>
