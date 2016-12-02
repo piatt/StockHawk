@@ -72,9 +72,9 @@ public class StocksActivity extends RxAppCompatActivity {
 
     private void configureStocksView(boolean hasState) {
         if (hasState) {
-            stocksAdapter = new StocksAdapter(storageManager.getStocks());
+            stocksAdapter = new StocksAdapter(this, storageManager.getStocks());
         } else {
-            stocksAdapter = new StocksAdapter();
+            stocksAdapter = new StocksAdapter(this);
             updateStocks();
         }
         stocksView.setLayoutManager(new LinearLayoutManager(this));

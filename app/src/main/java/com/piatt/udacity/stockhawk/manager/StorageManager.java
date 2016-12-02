@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.support.annotation.NonNull;
 
+import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -48,6 +49,11 @@ public class StorageManager {
 
     public List<Stock> getStocks() {
         return stockStorage.get();
+    }
+
+    public Stock getStock(String symbol) {
+        Optional<Stock> stockOptional = Stream.of(getStocks()).filter(stock -> stock.getSymbol().equals(symbol)).findFirst();
+        return stockOptional.isPresent() ? stockOptional.get() : null;
     }
 
     public boolean hasStock(Stock stock) {

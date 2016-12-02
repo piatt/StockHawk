@@ -15,40 +15,80 @@ import lombok.Setter;
 public class Stock {
     @Getter @SerializedName("Symbol") private String symbol;
     @Getter @SerializedName("Name") private String name;
-    @SerializedName("LastTradePriceOnly") private String price;
+    @SerializedName("LastTradePriceOnly") private String currentPrice;
     @SerializedName("Change") private String priceDelta;
     @SerializedName("PercentChange") private String percentDelta;
-    @SerializedName("Open") private String open;
-    @SerializedName("PreviousClose") private String close;
-    @SerializedName("DaysLow") private String dayLow;
-    @SerializedName("DaysHigh") private String dayHigh;
-    @SerializedName("YearLow") private String yearLow;
-    @SerializedName("YearHigh") private String yearHigh;
-    @SerializedName("MarketCapitalization") private String marketCap;
-    @SerializedName("Volume") private String volume;
-    @SerializedName("AverageDailyVolume") private String averageVolume;
+    @SerializedName("PreviousClose") private String closePrice;
+    @SerializedName("Open") private String openPrice;
+    @SerializedName("DaysLow") private String dayLowPrice;
+    @SerializedName("DaysHigh") private String dayHighPrice;
+    @SerializedName("YearLow") private String yearLowPrice;
+    @SerializedName("YearHigh") private String yearHighPrice;
     @SerializedName("EPSEstimateCurrentYear") private String eps;
     @SerializedName("PEGRatio") private String pegRatio;
+    @Getter @SerializedName("Volume") private String volume;
+    @Getter @SerializedName("AverageDailyVolume") private String averageVolume;
+    @Getter @SerializedName("MarketCapitalization") private String marketCap;
     @Getter @Setter private String timestamp;
 
     private transient final String DELTA_PATTERN = "([+-]*)(\\d+\\.\\d+)(%*)";
     private transient final DecimalFormat decimalFormat;
-    private transient final Pattern pattern;
+    private transient final Pattern deltaPattern;
 
     public Stock() {
         decimalFormat = (DecimalFormat) NumberFormat.getInstance();
         decimalFormat.setMinimumFractionDigits(2);
         decimalFormat.setMaximumFractionDigits(2);
-        pattern = Pattern.compile(DELTA_PATTERN);
+        deltaPattern = Pattern.compile(DELTA_PATTERN);
     }
 
-    public String getPrice() {
-        return price != null ? decimalFormat.format(Float.parseFloat(price)) : price;
+    public boolean isValid() {
+        return name != null;
+    }
+
+    private String getFormattedDecimal(String price) {
+        return price != null ? decimalFormat.format(Float.parseFloat(price)) : null;
+    }
+
+    public String getCurrentPrice() {
+        return getFormattedDecimal(currentPrice);
+    }
+
+    public String getClosePrice() {
+        return getFormattedDecimal(closePrice);
+    }
+
+    public String getOpenPrice() {
+        return getFormattedDecimal(openPrice);
+    }
+
+    public String getDayLowPrice() {
+        return getFormattedDecimal(dayLowPrice);
+    }
+
+    public String getDayHighPrice() {
+        return getFormattedDecimal(dayHighPrice);
+    }
+
+    public String getYearLowPrice() {
+        return getFormattedDecimal(yearLowPrice);
+    }
+
+    public String getYearHighPrice() {
+        return getFormattedDecimal(yearHighPrice);
+    }
+
+    public String getEps() {
+        return getFormattedDecimal(eps);
+    }
+
+    public String getPegRatio() {
+        return getFormattedDecimal(pegRatio);
     }
 
     public String getPriceDelta() {
         if (priceDelta != null) {
-            Matcher matcher = pattern.matcher(priceDelta);
+            Matcher matcher = deltaPattern.matcher(priceDelta);
             if (matcher.find()) {
                 String sign = matcher.group(1);
                 float number = Float.parseFloat(matcher.group(2));
@@ -60,7 +100,7 @@ public class Stock {
 
     public String getPercentDelta() {
         if (percentDelta != null) {
-            Matcher matcher = pattern.matcher(percentDelta);
+            Matcher matcher = deltaPattern.matcher(percentDelta);
             if (matcher.find()) {
                 String sign = matcher.group(1);
                 float number = Float.parseFloat(matcher.group(2));
@@ -73,9 +113,5 @@ public class Stock {
 
     public boolean hasPositiveDelta() {
         return priceDelta != null && Float.parseFloat(priceDelta) >= 0;
-    }
-
-    public boolean isValid() {
-        return name != null;
     }
 }

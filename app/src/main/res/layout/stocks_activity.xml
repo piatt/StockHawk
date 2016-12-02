@@ -9,10 +9,8 @@
         android:layout_height="wrap_content">
 
         <android.support.v7.widget.Toolbar
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:theme="@style/Toolbar"
-            app:title="@string/app_name">
+            app:title="@string/app_name"
+            style="@style/Toolbar">
 
             <LinearLayout
                 android:layout_width="wrap_content"

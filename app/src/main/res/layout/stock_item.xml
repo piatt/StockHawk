@@ -20,11 +20,11 @@
         app:layout_rowSpan="2"/>
 
     <TextView
-        android:id="@+id/price_view"
+        android:id="@+id/current_price_view"
         android:gravity="end"
         app:layout_gravity="fill_horizontal"
         app:layout_columnSpan="2"
-        style="@style/PriceView"/>
+        style="@style/CurrentPriceView"/>
 
     <TextView
         android:id="@+id/name_view"

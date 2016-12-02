@@ -23,4 +23,16 @@
     <string name="stock_item_message"><xliff:g id="symbol">%1$s</xliff:g> for <xliff:g id="name">%2$s</xliff:g> is currently trading at
         <xliff:g id="price">%3$s</xliff:g>, for a change of <xliff:g id="priceDelta">%4$s</xliff:g> and <xliff:g id="percentDelta">%5$s</xliff:g>.</string>
 
+    <string name="close_price_title">Last Close</string>
+    <string name="open_price_title">Open</string>
+    <string name="day_low_price_title">Day Low</string>
+    <string name="day_high_price_title">Day High</string>
+    <string name="year_low_price_title">Year Low</string>
+    <string name="year_high_price_title">Year High</string>
+    <string name="eps_title" translatable="false">EPS</string>
+    <string name="peg_ratio_title" translatable="false">P/E</string>
+    <string name="volume_title">Volume</string>
+    <string name="average_volume_title">Avg Volume</string>
+    <string name="market_cap_title">Market Cap</string>
+    <string name="timestamp_title">Last Update</string>
 </resources>

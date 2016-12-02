@@ -7,26 +7,32 @@
 
     <!-- Toolbar -->
     <style name="Toolbar" parent="ThemeOverlay.AppCompat.ActionBar">
-        <item name="android:textColorPrimary">@android:color/white</item>
-        <item name="android:textColorPrimaryInverse">@android:color/white</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">?attr/actionBarSize</item>
+        <item name="titleTextColor">@android:color/white</item>
     </style>
 
-    <!-- Message Layout -->
+    <!-- Message Views -->
     <style name="HeaderView" parent="TextAppearance.AppCompat.Medium">
         <item name="android:textStyle">bold</item>
     </style>
     <style name="CaptionView" parent="TextAppearance.AppCompat.Small"/>
 
-    <!-- Search Layout -->
+    <!-- Search Views -->
     <style name="ErrorView" parent="TextAppearance.Design.Error">
         <item name="android:textColor">@color/accent</item>
     </style>
 
-    <!-- Stock Item -->
+    <!-- Stock Views -->
     <style name="SymbolView" parent="TextAppearance.AppCompat.Display1">
         <item name="android:textAllCaps">true</item>
     </style>
     <style name="NameView" parent="TextAppearance.AppCompat.Caption"/>
-    <style name="PriceView" parent="TextAppearance.AppCompat.Display1"/>
+    <style name="CurrentPriceView" parent="TextAppearance.AppCompat.Display1"/>
     <style name="DeltaView" parent="TextAppearance.AppCompat.Body2"/>
+    <style name="StockKeyView" parent="TextAppearance.AppCompat.Body1"/>
+    <style name="StockValueView" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:gravity">end</item>
+        <item name="layout_gravity">fill_horizontal</item>
+    </style>
 </resources>
