@@ -16,7 +16,6 @@
     <style name="HeaderView" parent="TextAppearance.AppCompat.Medium">
         <item name="android:textStyle">bold</item>
     </style>
-    <style name="CaptionView" parent="TextAppearance.AppCompat.Small"/>
 
     <!-- Search Views -->
     <style name="ErrorView" parent="TextAppearance.Design.Error">
@@ -27,7 +26,9 @@
     <style name="SymbolView" parent="TextAppearance.AppCompat.Display1">
         <item name="android:textAllCaps">true</item>
     </style>
-    <style name="NameView" parent="TextAppearance.AppCompat.Caption"/>
+    <style name="ListNameView" parent="TextAppearance.AppCompat.Caption"/>
+    <style name="DetailNameView" parent="TextAppearance.AppCompat.Medium"/>
+
     <style name="CurrentPriceView" parent="TextAppearance.AppCompat.Display1"/>
     <style name="DeltaView" parent="TextAppearance.AppCompat.Body2"/>
     <style name="StockKeyView" parent="TextAppearance.AppCompat.Body1"/>

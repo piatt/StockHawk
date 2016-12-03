@@ -13,8 +13,6 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
 import com.jakewharton.rxbinding.support.design.widget.RxSnackbar;
 import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerView;
 import com.jakewharton.rxbinding.view.RxView;
@@ -25,10 +23,9 @@ import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import rx.Observable;
 
 public class StocksActivity extends RxAppCompatActivity {
     @BindView(R.id.timestamp_view) TextView timestampView;
@@ -134,12 +131,17 @@ public class StocksActivity extends RxAppCompatActivity {
 
     private void updateStocks() {
         if (StockHawkApplication.getApp().isNetworkAvailable()) {
-            List<String> symbols = Stream.of(storageManager.getStocks())
-                    .map(Stock::getSymbol)
-                    .collect(Collectors.toList());
-
-            ApiManager.getManager().getStocks(symbols)
+            Observable.from(storageManager.getStocks())
                     .compose(bindToLifecycle())
+                    .map(Stock::getSymbol)
+                    .toList()
+                    .flatMap(symbols -> {
+                        if (!symbols.isEmpty()) {
+                            return ApiManager.getManager().getStocks(symbols);
+                        } else {
+                            return Observable.empty();
+                        }
+                    })
                     .doOnSubscribe(() -> {
                         if (!refreshLayout.isRefreshing()) {
                             refreshLayout.setRefreshing(true);

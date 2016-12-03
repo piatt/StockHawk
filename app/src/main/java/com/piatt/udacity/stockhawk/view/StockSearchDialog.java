@@ -19,8 +19,6 @@ import com.piatt.udacity.stockhawk.manager.ApiManager;
 import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.trello.rxlifecycle.components.support.RxAppCompatDialogFragment;
 
-import java.util.Objects;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
@@ -71,10 +69,9 @@ public class StockSearchDialog extends RxAppCompatDialogFragment {
                         return ApiManager.getManager().getStock(symbol);
                     } else {
                         searchLayout.setError(getString(R.string.connection_message));
-                        return null;
+                        return Observable.empty();
                     }
                 })
-                .filter(Objects::nonNull)
                 .filter(stock -> {
                     boolean valid = stock.isValid();
                     if (!valid) {

@@ -23,7 +23,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    style="@style/CaptionView"/>
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
 
                 <android.support.v7.widget.AppCompatImageButton
                     android:id="@+id/refresh_button"
@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/instruction_message"
-            style="@style/CaptionView"/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
 
     </LinearLayout>
 

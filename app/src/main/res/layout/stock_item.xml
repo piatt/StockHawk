@@ -29,7 +29,7 @@
     <TextView
         android:id="@+id/name_view"
         app:layout_column="0"
-        style="@style/NameView"/>
+        style="@style/ListNameView"/>
 
     <TextView
         android:id="@+id/price_delta_view"

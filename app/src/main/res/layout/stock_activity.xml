@@ -20,119 +20,155 @@
         android:layout_margin="@dimen/standard_margin"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <android.support.v7.widget.GridLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:columnCount="7">
+            android:orientation="vertical">
 
-            <TextView
-                android:text="@string/close_price_title"
-                style="@style/StockKeyView"/>
+            <android.support.v7.widget.GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/standard_margin"
+                app:columnCount="3">
 
-            <android.support.v4.widget.Space
-                app:layout_columnWeight="1"
-                app:layout_rowSpan="6"/>
+                <TextView
+                    android:id="@+id/name_view"
+                    app:layout_columnSpan="3"
+                    style="@style/ListNameView"/>
 
-            <TextView
-                android:id="@+id/close_price_view"
-                style="@style/StockValueView"/>
+                <TextView
+                    android:id="@+id/current_price_view"
+                    android:layout_marginEnd="@dimen/large_margin"
+                    android:layout_marginBottom="@dimen/medium_margin"
+                    android:textSize="48sp"
+                    style="@style/CurrentPriceView"/>
 
-            <android.support.v4.widget.Space
-                android:layout_width="@dimen/standard_margin"
-                app:layout_rowSpan="6"/>
+                <TextView
+                    android:id="@+id/price_delta_view"
+                    android:layout_marginEnd="@dimen/standard_margin"
+                    style="@style/DeltaView"/>
 
-            <TextView
-                android:text="@string/eps_title"
-                style="@style/StockKeyView"/>
+                <TextView
+                    android:id="@+id/percent_delta_view"
+                    app:layout_gravity="start"
+                    style="@style/DeltaView"/>
 
-            <android.support.v4.widget.Space
-                app:layout_columnWeight="1"
-                app:layout_rowSpan="6"/>
+            </android.support.v7.widget.GridLayout>
 
-            <TextView
-                android:id="@+id/eps_view"
-                style="@style/StockValueView"/>
+            <android.support.v7.widget.GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:columnCount="7">
 
-            <TextView
-                android:text="@string/open_price_title"
-                style="@style/StockKeyView"/>
+                <TextView
+                    android:text="@string/close_price_title"
+                    style="@style/StockKeyView"/>
 
-            <TextView
-                android:id="@+id/open_price_view"
-                style="@style/StockValueView"/>
+                <android.support.v4.widget.Space
+                    app:layout_columnWeight="1"
+                    app:layout_rowSpan="6"/>
 
-            <TextView
-                android:text="@string/peg_ratio_title"
-                style="@style/StockKeyView"/>
+                <TextView
+                    android:id="@+id/close_price_view"
+                    style="@style/StockValueView"/>
 
-            <TextView
-                android:id="@+id/peg_ratio_view"
-                style="@style/StockValueView"/>
+                <android.support.v4.widget.Space
+                    android:layout_width="@dimen/standard_margin"
+                    app:layout_rowSpan="6"/>
 
-            <TextView
-                android:text="@string/day_low_price_title"
-                style="@style/StockKeyView"/>
+                <TextView
+                    android:text="@string/eps_title"
+                    style="@style/StockKeyView"/>
 
-            <TextView
-                android:id="@+id/day_low_price_view"
-                style="@style/StockValueView"/>
+                <android.support.v4.widget.Space
+                    app:layout_columnWeight="1"
+                    app:layout_rowSpan="6"/>
 
-            <TextView
-                android:text="@string/volume_title"
-                style="@style/StockKeyView"/>
+                <TextView
+                    android:id="@+id/eps_view"
+                    style="@style/StockValueView"/>
 
-            <TextView
-                android:id="@+id/volume_view"
-                style="@style/StockValueView"/>
+                <TextView
+                    android:text="@string/open_price_title"
+                    style="@style/StockKeyView"/>
 
-            <TextView
-                android:text="@string/day_high_price_title"
-                style="@style/StockKeyView"/>
+                <TextView
+                    android:id="@+id/open_price_view"
+                    style="@style/StockValueView"/>
 
-            <TextView
-                android:id="@+id/day_high_price_view"
-                style="@style/StockValueView"/>
+                <TextView
+                    android:text="@string/peg_ratio_title"
+                    style="@style/StockKeyView"/>
 
-            <TextView
-                android:text="@string/average_volume_title"
-                style="@style/StockKeyView"/>
+                <TextView
+                    android:id="@+id/peg_ratio_view"
+                    style="@style/StockValueView"/>
 
-            <TextView
-                android:id="@+id/average_volume_view"
-                style="@style/StockValueView"/>
+                <TextView
+                    android:text="@string/day_low_price_title"
+                    style="@style/StockKeyView"/>
 
-            <TextView
-                android:text="@string/year_low_price_title"
-                style="@style/StockKeyView"/>
+                <TextView
+                    android:id="@+id/day_low_price_view"
+                    style="@style/StockValueView"/>
 
-            <TextView
-                android:id="@+id/year_low_price_view"
-                style="@style/StockValueView"/>
+                <TextView
+                    android:text="@string/volume_title"
+                    style="@style/StockKeyView"/>
 
-            <TextView
-                android:text="@string/market_cap_title"
-                style="@style/StockKeyView"/>
+                <TextView
+                    android:id="@+id/volume_view"
+                    style="@style/StockValueView"/>
 
-            <TextView
-                android:id="@+id/market_cap_view"
-                style="@style/StockValueView"/>
+                <TextView
+                    android:text="@string/day_high_price_title"
+                    style="@style/StockKeyView"/>
 
-            <TextView
-                android:text="@string/year_high_price_title"
-                style="@style/StockKeyView"/>
+                <TextView
+                    android:id="@+id/day_high_price_view"
+                    style="@style/StockValueView"/>
 
-            <TextView
-                android:id="@+id/year_high_price_view"
-                style="@style/StockValueView"/>
+                <TextView
+                    android:text="@string/average_volume_title"
+                    style="@style/StockKeyView"/>
 
-           <TextView
-                android:text="@string/timestamp_title"
-                style="@style/StockKeyView"/>
+                <TextView
+                    android:id="@+id/average_volume_view"
+                    style="@style/StockValueView"/>
 
-            <TextView
-                android:id="@+id/timestamp_view"
-                style="@style/StockValueView"/>
+                <TextView
+                    android:text="@string/year_low_price_title"
+                    style="@style/StockKeyView"/>
 
-        </android.support.v7.widget.GridLayout>
+                <TextView
+                    android:id="@+id/year_low_price_view"
+                    style="@style/StockValueView"/>
+
+                <TextView
+                    android:text="@string/market_cap_title"
+                    style="@style/StockKeyView"/>
+
+                <TextView
+                    android:id="@+id/market_cap_view"
+                    style="@style/StockValueView"/>
+
+                <TextView
+                    android:text="@string/year_high_price_title"
+                    style="@style/StockKeyView"/>
+
+                <TextView
+                    android:id="@+id/year_high_price_view"
+                    style="@style/StockValueView"/>
+
+                <TextView
+                    android:text="@string/timestamp_title"
+                    style="@style/StockKeyView"/>
+
+                <TextView
+                    android:id="@+id/timestamp_view"
+                    style="@style/StockValueView"/>
+
+            </android.support.v7.widget.GridLayout>
+        </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 </android.support.design.widget.CoordinatorLayout>

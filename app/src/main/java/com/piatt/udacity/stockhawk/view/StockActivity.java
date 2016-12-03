@@ -2,6 +2,7 @@ package com.piatt.udacity.stockhawk.view;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -17,10 +18,10 @@ import butterknife.ButterKnife;
 
 public class StockActivity extends RxAppCompatActivity {
     @BindView(R.id.toolbar) Toolbar toolbar;
-//    @BindView(R.id.name_view) TextView nameView;
-//    @BindView(R.id.current_price_view) TextView currentPriceView;
-//    @BindView(R.id.price_delta_view) TextView priceDeltaView;
-//    @BindView(R.id.percent_delta_view) TextView percentDeltaView;
+    @BindView(R.id.current_price_view) TextView currentPriceView;
+    @BindView(R.id.price_delta_view) TextView priceDeltaView;
+    @BindView(R.id.percent_delta_view) TextView percentDeltaView;
+    @BindView(R.id.name_view) TextView nameView;
     @BindView(R.id.close_price_view) TextView closePriceView;
     @BindView(R.id.open_price_view) TextView openPriceView;
     @BindView(R.id.day_low_price_view) TextView dayLowPriceView;
@@ -71,13 +72,13 @@ public class StockActivity extends RxAppCompatActivity {
 
     private void configureStockView(String symbol) {
         Stock stock = storageManager.getStock(symbol);
-//        nameView.setText(stock.getName());
-//        currentPriceView.setText(stock.getCurrentPrice());
-//        priceDeltaView.setText(stock.getPriceDelta());
-//        percentDeltaView.setText(stock.getPercentDelta());
-//        int deltaColor = stock.hasPositiveDelta() ? Color.GREEN : Color.RED;
-//        priceDeltaView.setTextColor(deltaColor);
-//        percentDeltaView.setTextColor(deltaColor);
+        currentPriceView.setText(stock.getCurrentPrice());
+        priceDeltaView.setText(stock.getPriceDelta());
+        percentDeltaView.setText(stock.getPercentDelta());
+        int deltaColor = stock.hasPositiveDelta() ? Color.GREEN : Color.RED;
+        priceDeltaView.setTextColor(deltaColor);
+        percentDeltaView.setTextColor(deltaColor);
+        nameView.setText(stock.getName());
 //        itemView.setContentDescription(getContentDescription(stock));
         closePriceView.setText(stock.getClosePrice());
         openPriceView.setText(stock.getOpenPrice());
