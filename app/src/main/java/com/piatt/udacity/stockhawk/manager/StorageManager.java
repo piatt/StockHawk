@@ -28,23 +28,18 @@ public class StorageManager {
     private final String PREF_TIMESTAMP = "TIMESTAMP";
     private final String PREF_STOCKS = "STOCKS";
     private final int ADD_STOCK_EVENT = 0;
-    private final int UPDATE_STOCK_EVENT = 1;
-    private final int REMOVE_STOCK_EVENT = 2;
+    private final int REMOVE_STOCK_EVENT = 1;
 
     private Preference<String> timestamp;
     private Preference<List<Stock>> stockStorage;
-    private PublishSubject<StockEvent> stockEventBus = PublishSubject.create();
-    @Getter private static StorageManager manager = new StorageManager();
+    private PublishSubject<StockEvent> stockEventBus;
 
-    private StorageManager() {
+    public StorageManager() {
         SharedPreferences sharedPreferences = StockHawkApplication.getApp().getSharedPreferences(PREF_TAG, Context.MODE_PRIVATE);
         RxSharedPreferences rxSharedPreferences = RxSharedPreferences.create(sharedPreferences);
         timestamp = rxSharedPreferences.getString(PREF_TIMESTAMP);
         stockStorage = rxSharedPreferences.getObject(PREF_STOCKS, new ArrayList<>(), new StockStorageAdapter());
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp.set(timestamp);
+        stockEventBus = PublishSubject.create();
     }
 
     public List<Stock> getStocks() {
@@ -52,7 +47,9 @@ public class StorageManager {
     }
 
     public Stock getStock(String symbol) {
-        Optional<Stock> stockOptional = Stream.of(getStocks()).filter(stock -> stock.getSymbol().equals(symbol)).findFirst();
+        Optional<Stock> stockOptional = Stream.of(getStocks())
+                .filter(stock -> stock.getSymbol().equals(symbol))
+                .findFirst();
         return stockOptional.isPresent() ? stockOptional.get() : null;
     }
 
@@ -61,6 +58,7 @@ public class StorageManager {
     }
 
     public void addStock(Stock stock) {
+        stock.setTimestamp(StockHawkApplication.getApp().getCurrentTimestamp());
         List<Stock> stocks = getStocks();
         if (stocks.add(stock)) {
             stockStorage.set(stocks);
@@ -68,14 +66,8 @@ public class StorageManager {
         }
     }
 
-    public void updateStocks(List<Stock> updatedStocks) {
-        List<Stock> stocks = getStocks();
-        Stream.of(updatedStocks).forEach(stock -> {
-            if (stocks.remove(stock)) {
-                stocks.add(stock);
-                stockEventBus.onNext(new StockEvent(stock, UPDATE_STOCK_EVENT));
-            }
-        });
+    public void updateStocks(List<Stock> stocks) {
+        timestamp.set(StockHawkApplication.getApp().getCurrentTimestamp());
         stockStorage.set(stocks);
     }
 
@@ -87,12 +79,16 @@ public class StorageManager {
         }
     }
 
-    public Observable<Stock> onStockAdded() {
-        return stockEventBus.filter(stockEvent -> stockEvent.getType() == ADD_STOCK_EVENT).map(StockEvent::getStock);
+    public Observable<String> onTimestampChanged() {
+        return timestamp.asObservable();
     }
 
-    public Observable<Stock> onStockUpdated() {
-        return stockEventBus.filter(stockEvent -> stockEvent.getType() == UPDATE_STOCK_EVENT).map(StockEvent::getStock);
+    public Observable<List<Stock>> onStocksUpdated() {
+        return stockStorage.asObservable();
+    }
+
+    public Observable<Stock> onStockAdded() {
+        return stockEventBus.filter(stockEvent -> stockEvent.getType() == ADD_STOCK_EVENT).map(StockEvent::getStock);
     }
 
     public Observable<Stock> onStockRemoved() {
@@ -101,10 +97,6 @@ public class StorageManager {
 
     public Observable<Integer> onSizeChanged() {
         return Observable.merge(onStockAdded(), onStockRemoved()).map(stock -> getStocks().size()).startWith(getStocks().size());
-    }
-
-    public Observable<String> onTimestampChanged() {
-        return timestamp.asObservable();
     }
 
     @AllArgsConstructor

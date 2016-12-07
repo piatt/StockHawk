@@ -22,11 +22,15 @@ import com.trello.rxlifecycle.components.support.RxAppCompatDialogFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 
 public class StockSearchDialog extends RxAppCompatDialogFragment {
     @BindView(R.id.search_layout) TextInputLayout searchLayout;
     @BindView(R.id.search_view) TextInputEditText searchView;
     @BindView(R.id.add_button) AppCompatButton addButton;
+
+    private ApiManager apiManager = StockHawkApplication.getApp().getApiManager();
+    private StorageManager storageManager = StockHawkApplication.getApp().getStorageManager();
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -66,12 +70,13 @@ public class StockSearchDialog extends RxAppCompatDialogFragment {
                 .flatMap(action -> {
                     if (StockHawkApplication.getApp().isNetworkAvailable()) {
                         String symbol = searchView.getText().toString();
-                        return ApiManager.getManager().getStock(symbol);
+                        return apiManager.getStock(symbol);
                     } else {
                         searchLayout.setError(getString(R.string.connection_message));
                         return Observable.empty();
                     }
                 })
+                .observeOn(AndroidSchedulers.mainThread())
                 .filter(stock -> {
                     boolean valid = stock.isValid();
                     if (!valid) {
@@ -80,7 +85,7 @@ public class StockSearchDialog extends RxAppCompatDialogFragment {
                     return valid;
                 })
                 .filter(stock -> {
-                    boolean duplicateStock = StorageManager.getManager().hasStock(stock);
+                    boolean duplicateStock = storageManager.hasStock(stock);
                     if (duplicateStock) {
                         searchLayout.setError(getString(R.string.duplicate_message));
                     }
@@ -89,7 +94,7 @@ public class StockSearchDialog extends RxAppCompatDialogFragment {
                 .doOnError(error -> searchLayout.setError(getString(R.string.error_message)))
                 .retry()
                 .subscribe(stock -> {
-                    StorageManager.getManager().addStock(stock);
+                    storageManager.addStock(stock);
                     dismiss();
                 });
     }

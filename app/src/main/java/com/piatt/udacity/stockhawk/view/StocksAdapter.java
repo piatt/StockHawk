@@ -10,33 +10,38 @@ import android.widget.TextView;
 
 import com.jakewharton.rxbinding.view.RxView;
 import com.piatt.udacity.stockhawk.R;
+import com.piatt.udacity.stockhawk.StockHawkApplication;
 import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
 import com.piatt.udacity.stockhawk.view.StocksAdapter.StockViewHolder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 
 public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
     private Context context;
     private List<Stock> stocks;
 
     public StocksAdapter(Context context) {
-        this(context, new ArrayList<>());
-    }
-
-    public StocksAdapter(Context context, List<Stock> stocks) {
         this.context = context;
-        this.stocks = stocks;
-        notifyDataSetChanged();
 
-        StorageManager storageManager = StorageManager.getManager();
-        Observable.merge(storageManager.onStockAdded(), storageManager.onStockUpdated())
+        StorageManager storageManager = StockHawkApplication.getApp().getStorageManager();
+        stocks = storageManager.getStocks();
+
+        storageManager.onStocksUpdated()
+                .observeOn(AndroidSchedulers.mainThread())
+                .skip(1)
+                .subscribe(stocks -> {
+                    this.stocks = stocks;
+                    notifyDataSetChanged();
+                });
+
+        storageManager.onStockAdded()
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::addOrUpdateStock);
     }
 

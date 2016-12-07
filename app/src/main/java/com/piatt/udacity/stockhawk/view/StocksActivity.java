@@ -18,7 +18,8 @@ import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerView;
 import com.jakewharton.rxbinding.view.RxView;
 import com.piatt.udacity.stockhawk.R;
 import com.piatt.udacity.stockhawk.StockHawkApplication;
-import com.piatt.udacity.stockhawk.manager.ApiManager;
+import com.piatt.udacity.stockhawk.manager.StockManager;
+import com.piatt.udacity.stockhawk.manager.StockManager.StocksEvent;
 import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
@@ -26,6 +27,7 @@ import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 
 public class StocksActivity extends RxAppCompatActivity {
     @BindView(R.id.timestamp_view) TextView timestampView;
@@ -35,9 +37,11 @@ public class StocksActivity extends RxAppCompatActivity {
     @BindView(R.id.stocks_view) RecyclerView stocksView;
     @BindView(R.id.add_button) FloatingActionButton addButton;
 
+    private final String STOCK_VIEW_KEY = "STOCK_VIEW_KEY";
     private StocksAdapter stocksAdapter;
-    private StorageManager storageManager = StorageManager.getManager();
-    private final String STOCK_VIEW_STATE = "STOCK_VIEW_STATE";
+    private StockManager stockManager;
+    private StorageManager storageManager;
+    private boolean restarted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +49,11 @@ public class StocksActivity extends RxAppCompatActivity {
         setContentView(R.layout.stocks_activity);
         ButterKnife.bind(this);
 
-        boolean hasState = savedInstanceState != null;
-        configureStocksView(hasState);
+        stockManager = StockHawkApplication.getApp().getStockManager();
+        storageManager = StockHawkApplication.getApp().getStorageManager();
+        restarted = savedInstanceState != null;
+
+        configureStocksView();
         configureRefreshViews();
         configureAddButton();
     }
@@ -54,31 +61,30 @@ public class StocksActivity extends RxAppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         Parcelable stockViewState = stocksView.getLayoutManager().onSaveInstanceState();
-        outState.putParcelable(STOCK_VIEW_STATE, stockViewState);
+        outState.putParcelable(STOCK_VIEW_KEY, stockViewState);
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null && savedInstanceState.containsKey(STOCK_VIEW_STATE)) {
-            Parcelable stockViewState = savedInstanceState.getParcelable(STOCK_VIEW_STATE);
+        if (savedInstanceState != null && savedInstanceState.containsKey(STOCK_VIEW_KEY)) {
+            Parcelable stockViewState = savedInstanceState.getParcelable(STOCK_VIEW_KEY);
             stocksView.getLayoutManager().onRestoreInstanceState(stockViewState);
         }
     }
 
-    private void configureStocksView(boolean hasState) {
-        if (hasState) {
-            stocksAdapter = new StocksAdapter(this, storageManager.getStocks());
-        } else {
-            stocksAdapter = new StocksAdapter(this);
-            updateStocks();
-        }
+    private void configureStocksView() {
+        stocksAdapter = new StocksAdapter(this);
         stocksView.setLayoutManager(new LinearLayoutManager(this));
         stocksView.setAdapter(stocksAdapter);
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(stockItemTouchHelperCallback);
         itemTouchHelper.attachToRecyclerView(stocksView);
+
+        if (!restarted) {
+            stockManager.updateStocks();
+        }
 
         storageManager.onStockAdded()
                 .compose(bindToLifecycle())
@@ -91,11 +97,27 @@ public class StocksActivity extends RxAppCompatActivity {
     private void configureRefreshViews() {
         refreshLayout.setColorSchemeColors(Color.WHITE);
         refreshLayout.setProgressBackgroundColorSchemeResource(R.color.accent);
-        refreshLayout.setOnRefreshListener(this::updateStocks);
+        refreshLayout.setOnRefreshListener(() -> stockManager.updateStocks());
 
         RxView.clicks(refreshButton)
                 .compose(bindToLifecycle())
-                .subscribe(click -> updateStocks());
+                .subscribe(click -> stockManager.updateStocks());
+
+        Observable<StocksEvent> onStocksEvent = stockManager.onStocksEvent()
+                .compose(bindToLifecycle())
+                .observeOn(AndroidSchedulers.mainThread());
+
+        if (restarted && !stockManager.hasPendingUpdate()) {
+            onStocksEvent = onStocksEvent.skip(1);
+        }
+
+        onStocksEvent.subscribe(stocksEvent -> {
+            refreshLayout.setRefreshing(stocksEvent.isUpdating());
+            String message = stocksEvent.getMessage();
+            if (message != null) {
+                Snackbar.make(messageLayout, message, Snackbar.LENGTH_LONG).show();
+            }
+        });
 
         storageManager.onSizeChanged()
                 .compose(bindToLifecycle())
@@ -129,39 +151,6 @@ public class StocksActivity extends RxAppCompatActivity {
                 });
     }
 
-    private void updateStocks() {
-        if (StockHawkApplication.getApp().isNetworkAvailable()) {
-            Observable.from(storageManager.getStocks())
-                    .compose(bindToLifecycle())
-                    .map(Stock::getSymbol)
-                    .toList()
-                    .flatMap(symbols -> {
-                        if (!symbols.isEmpty()) {
-                            return ApiManager.getManager().getStocks(symbols);
-                        } else {
-                            return Observable.empty();
-                        }
-                    })
-                    .doOnSubscribe(() -> {
-                        if (!refreshLayout.isRefreshing()) {
-                            refreshLayout.setRefreshing(true);
-                        }
-                    })
-                    .doOnNext(stocks -> storageManager.updateStocks(stocks))
-                    .doOnError(error -> Snackbar.make(messageLayout, R.string.error_message, Snackbar.LENGTH_LONG).show())
-                    .doOnCompleted(() -> {
-                        refreshLayout.setRefreshing(false);
-                        if (storageManager.getStocks().size() > 0) {
-                            Snackbar.make(messageLayout, R.string.data_message, Snackbar.LENGTH_LONG).show();
-                        }
-                    })
-                    .subscribe();
-        } else {
-            refreshLayout.setRefreshing(false);
-            Snackbar.make(messageLayout, R.string.connection_message, Snackbar.LENGTH_LONG).show();
-        }
-    }
-
     private ItemTouchHelper.Callback stockItemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START | ItemTouchHelper.END) {
         @Override
         public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -184,7 +173,7 @@ public class StocksActivity extends RxAppCompatActivity {
                     .compose(bindToLifecycle())
                     .subscribe(event -> {
                         if (event != Snackbar.Callback.DISMISS_EVENT_ACTION) {
-                            StorageManager.getManager().removeStock(stock);
+                            storageManager.removeStock(stock);
                         }
                     });
         }

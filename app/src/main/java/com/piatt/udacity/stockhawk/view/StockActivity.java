@@ -5,10 +5,11 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.jakewharton.rxbinding.support.v7.widget.RxToolbar;
 import com.piatt.udacity.stockhawk.R;
+import com.piatt.udacity.stockhawk.StockHawkApplication;
 import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
@@ -35,8 +36,8 @@ public class StockActivity extends RxAppCompatActivity {
     @BindView(R.id.market_cap_view) TextView marketCapView;
     @BindView(R.id.timestamp_view) TextView timestampView;
 
-    private StorageManager storageManager = StorageManager.getManager();
     private static final String STOCK_KEY = "STOCK_KEY";
+    private StorageManager storageManager = StockHawkApplication.getApp().getStorageManager();
 
     public static Intent buildIntent(Context context, String symbol) {
         Intent intent = new Intent(context, StockActivity.class);
@@ -55,19 +56,12 @@ public class StockActivity extends RxAppCompatActivity {
         configureStockView(symbol);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private void configureToolbar(String symbol) {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(symbol);
+
+        RxToolbar.navigationClicks(toolbar).subscribe(click -> onBackPressed());
     }
 
     private void configureStockView(String symbol) {
