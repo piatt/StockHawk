@@ -34,27 +34,18 @@ public class StocksAdapter extends RecyclerView.Adapter<StockViewHolder> {
 
         storageManager.onStocksUpdated()
                 .observeOn(AndroidSchedulers.mainThread())
-                .skip(1)
-                .subscribe(stocks -> {
-                    this.stocks = stocks;
-                    notifyDataSetChanged();
-                });
-
-        storageManager.onStockAdded()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::addOrUpdateStock);
+                .subscribe(this::updateStocks);
     }
 
-    private void addOrUpdateStock(Stock stock) {
-        int position = stocks.indexOf(stock);
-        if (position == -1) {
-            stocks.add(stock);
-            notifyItemInserted(getItemCount() - 1);
-        } else {
-            stocks.remove(stock);
-            stocks.add(position, stock);
-            notifyItemChanged(position, null);
-        }
+    private void updateStocks(List<Stock> stocks) {
+        this.stocks = stocks;
+        notifyDataSetChanged();
+    }
+
+    public int addStock(Stock stock) {
+        int position = getItemCount();
+        addStock(stock, position);
+        return position;
     }
 
     public void addStock(Stock stock, int position) {

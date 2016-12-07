@@ -24,6 +24,8 @@ import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
@@ -89,8 +91,8 @@ public class StocksActivity extends RxAppCompatActivity {
         storageManager.onStockAdded()
                 .compose(bindToLifecycle())
                 .subscribe(stock -> {
-                    int lastPosition = stocksView.getAdapter().getItemCount() - 1;
-                    stocksView.smoothScrollToPosition(lastPosition);
+                    int position = stocksAdapter.addStock(stock);
+                    stocksView.smoothScrollToPosition(position);
                 });
     }
 
@@ -159,6 +161,7 @@ public class StocksActivity extends RxAppCompatActivity {
 
         @Override
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+            AtomicBoolean pendingRemoval = new AtomicBoolean(true);
             int position = viewHolder.getAdapterPosition();
             Stock stock = stocksAdapter.removeStock(position);
 
@@ -171,11 +174,18 @@ public class StocksActivity extends RxAppCompatActivity {
 
             RxSnackbar.dismisses(snackbar)
                     .compose(bindToLifecycle())
-                    .subscribe(event -> {
+                    .doOnNext(event -> {
+                        pendingRemoval.set(false);
                         if (event != Snackbar.Callback.DISMISS_EVENT_ACTION) {
                             storageManager.removeStock(stock);
                         }
-                    });
+                    })
+                    .doOnCompleted(() -> {
+                        if (pendingRemoval.get()) {
+                            storageManager.removeStock(stock);
+                        }
+                    })
+                    .subscribe();
         }
     };
 }

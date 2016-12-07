@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.piatt.udacity.stockhawk.model.Stock;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -26,12 +27,12 @@ import rx.Observable;
 import rx.schedulers.Schedulers;
 
 public class ApiManager {
-    private Gson gson;
     private StockApi stockApi;
 
     public ApiManager() {
-        gson = new GsonBuilder()
-                .registerTypeAdapter(new TypeToken<List<Stock>>() {}.getType(), new StocksDeserializer())
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(new TypeToken<List<Stock>>() {
+                }.getType(), new StocksDeserializer())
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -84,10 +85,10 @@ public class ApiManager {
                         .get(StockApi.API_QUOTE_MEMBER);
 
                 if (quoteElement.isJsonArray()) {
-                    return gson.fromJson(quoteElement, typeOfT);
+                    return new Gson().fromJson(quoteElement, typeOfT);
                 } else if (quoteElement.isJsonObject()) {
                     Stock stock = context.deserialize(quoteElement, Stock.class);
-                    return Collections.singletonList(stock);
+                    return Arrays.asList(stock);
                 }
             }
             throw new RuntimeException();
