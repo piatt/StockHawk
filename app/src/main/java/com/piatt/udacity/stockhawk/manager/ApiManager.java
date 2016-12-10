@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.piatt.udacity.stockhawk.model.Stock;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -88,7 +89,7 @@ public class ApiManager {
                     return new Gson().fromJson(quoteElement, typeOfT);
                 } else if (quoteElement.isJsonObject()) {
                     Stock stock = context.deserialize(quoteElement, Stock.class);
-                    return Arrays.asList(stock);
+                    return new ArrayList<>(Arrays.asList(stock));
                 }
             }
             throw new RuntimeException();

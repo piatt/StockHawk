@@ -96,6 +96,6 @@ public class StockSearchDialog extends RxAppCompatDialogFragment {
                 .subscribe(stock -> {
                     storageManager.addStock(stock);
                     dismiss();
-                });
+                }, error -> {});
     }
 }
