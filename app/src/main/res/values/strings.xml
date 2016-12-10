@@ -17,6 +17,7 @@
 
     <string name="search_title">Stock Search</string>
     <string name="search_hint">AAPL</string>
+    <string name="search_regex" translatable="false">-.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789</string>
 
     <string name="refresh_button_message">Click here to refresh all stocks.</string>
     <string name="add_button_message">Click here to add a stock.</string>

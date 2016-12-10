@@ -28,7 +28,10 @@
             android:id="@+id/search_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:singleLine="true"
             android:inputType="textCapCharacters"
+            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-"
+            android:imeOptions="actionDone"
             android:hint="@string/search_hint"/>
 
     </android.support.design.widget.TextInputLayout>
