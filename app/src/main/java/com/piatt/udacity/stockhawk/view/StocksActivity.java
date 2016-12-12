@@ -14,12 +14,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.jakewharton.rxbinding.support.design.widget.RxSnackbar;
-import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerView;
 import com.jakewharton.rxbinding.view.RxView;
 import com.piatt.udacity.stockhawk.R;
 import com.piatt.udacity.stockhawk.StockHawkApplication;
 import com.piatt.udacity.stockhawk.manager.StockManager;
-import com.piatt.udacity.stockhawk.manager.StockManager.StocksEvent;
 import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
@@ -28,7 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 
 public class StocksActivity extends RxAppCompatActivity {
@@ -90,6 +87,7 @@ public class StocksActivity extends RxAppCompatActivity {
 
         storageManager.onStockAdded()
                 .compose(bindToLifecycle())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stock -> {
                     int position = stocksAdapter.addStock(stock);
                     stocksView.smoothScrollToPosition(position);
@@ -105,21 +103,16 @@ public class StocksActivity extends RxAppCompatActivity {
                 .compose(bindToLifecycle())
                 .subscribe(click -> stockManager.updateStocks());
 
-        Observable<StocksEvent> onStocksEvent = stockManager.onStocksEvent()
+        stockManager.onStockManagerEvent(restarted)
                 .compose(bindToLifecycle())
-                .observeOn(AndroidSchedulers.mainThread());
-
-        if (restarted && !stockManager.hasPendingUpdate()) {
-            onStocksEvent = onStocksEvent.skip(1);
-        }
-
-        onStocksEvent.subscribe(stocksEvent -> {
-            refreshLayout.setRefreshing(stocksEvent.isUpdating());
-            String message = stocksEvent.getMessage();
-            if (message != null) {
-                Snackbar.make(messageLayout, message, Snackbar.LENGTH_LONG).show();
-            }
-        });
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(event -> {
+                    refreshLayout.setRefreshing(event.isInProgress());
+                    String message = event.getMessage();
+                    if (message != null) {
+                        Snackbar.make(messageLayout, message, Snackbar.LENGTH_LONG).show();
+                    }
+                });
 
         storageManager.onSizeChanged()
                 .compose(bindToLifecycle())
@@ -141,16 +134,6 @@ public class StocksActivity extends RxAppCompatActivity {
         RxView.clicks(addButton)
                 .compose(bindToLifecycle())
                 .subscribe(click -> new StockSearchDialog().show(getSupportFragmentManager(), StockSearchDialog.class.getName()));
-
-        RxRecyclerView.scrollEvents(stocksView)
-                .compose(bindToLifecycle())
-                .subscribe(event -> {
-                    if (event.dy() > 0) {
-                        addButton.hide();
-                    } else if (event.dy() <= 0) {
-                        addButton.show();
-                    }
-                });
     }
 
     private ItemTouchHelper.Callback stockItemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START | ItemTouchHelper.END) {

@@ -14,10 +14,10 @@ import com.piatt.udacity.stockhawk.model.Stock;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -32,8 +32,7 @@ public class ApiManager {
 
     public ApiManager() {
         Gson gson = new GsonBuilder()
-                .registerTypeAdapter(new TypeToken<List<Stock>>() {
-                }.getType(), new StocksDeserializer())
+                .registerTypeAdapter(new TypeToken<List<Stock>>() {}.getType(), new StocksDeserializer())
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -45,25 +44,16 @@ public class ApiManager {
         stockApi = retrofit.create(StockApi.class);
     }
 
-    public Observable<Stock> getStock(String symbol) {
-        if (symbol != null) {
-            List<String> symbols = Collections.singletonList(symbol);
-            return stockApi.getStocks(getStockQueryMap(symbols))
-                    .map(stocks -> stocks.get(0))
-                    .subscribeOn(Schedulers.io());
-        }
-        return Observable.empty();
-    }
-
     public Observable<List<Stock>> getStocks(List<String> symbols) {
         if (!symbols.isEmpty()) {
-            return stockApi.getStocks(getStockQueryMap(symbols))
+            return stockApi.getStocks(getStocksQueryMap(symbols))
+                    .delay(3, TimeUnit.SECONDS)
                     .subscribeOn(Schedulers.io());
         }
         return Observable.empty();
     }
 
-    private Map<String, String> getStockQueryMap(List<String> symbols) {
+    private Map<String, String> getStocksQueryMap(List<String> symbols) {
         String formattedSymbols = Stream.of(symbols)
                 .map(symbol -> String.format("'%s'", symbol))
                 .collect(Collectors.joining(","));
@@ -110,6 +100,6 @@ public class ApiManager {
         String API_QUOTE_MEMBER = "quote";
 
         @GET(API_QUERY_ENDPOINT)
-        Observable<List<Stock>> getStocks(@QueryMap Map<String, String> stockQueryMap);
+        Observable<List<Stock>> getStocks(@QueryMap Map<String, String> stocksQueryMap);
     }
 }

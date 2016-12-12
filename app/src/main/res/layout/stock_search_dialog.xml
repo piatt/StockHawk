@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:inputType="textCapCharacters"
-            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-"
+            android:digits="@string/search_regex"
             android:imeOptions="actionDone"
             android:hint="@string/search_hint"/>
 

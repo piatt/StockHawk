@@ -61,7 +61,9 @@ public class StockActivity extends RxAppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(symbol);
 
-        RxToolbar.navigationClicks(toolbar).subscribe(click -> onBackPressed());
+        RxToolbar.navigationClicks(toolbar)
+                .compose(bindToLifecycle())
+                .subscribe(click -> onBackPressed());
     }
 
     private void configureStockView(String symbol) {
