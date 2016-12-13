@@ -11,12 +11,43 @@ import rx.subjects.BehaviorSubject;
 public class StockManager {
     private ApiManager apiManager;
     private StorageManager storageManager;
-    private BehaviorSubject<StocksEvent> stocksEventBus;
+    private BehaviorSubject<StockManagerEvent> searchStockEventBus;
+    private BehaviorSubject<StockManagerEvent> updateStocksEventBus;
 
     public StockManager() {
         apiManager = StockHawkApplication.getApp().getApiManager();
         storageManager = StockHawkApplication.getApp().getStorageManager();
-        stocksEventBus = BehaviorSubject.create();
+        searchStockEventBus = BehaviorSubject.create();
+        updateStocksEventBus = BehaviorSubject.create();
+    }
+
+    public void addStock(String symbol) {
+        if (StockHawkApplication.getApp().isNetworkAvailable()) {
+            Observable.just(symbol)
+                    .toList()
+                    .flatMap(symbols -> apiManager.getStocks(symbols))
+                    .map(stocks -> stocks.get(0))
+                    .filter(stock -> {
+                        boolean valid = stock.isValid();
+                        if (!valid) {
+                            searchStockEventBus.onNext(new StockManagerEvent(R.string.invalid_message));
+                        }
+                        return valid;
+                    })
+                    .filter(stock -> {
+                        boolean duplicateStock = storageManager.hasStock(stock);
+                        if (duplicateStock) {
+                            searchStockEventBus.onNext(new StockManagerEvent(R.string.duplicate_message));
+                        }
+                        return !duplicateStock;
+                    })
+                    .subscribe(stock -> {
+                        storageManager.addStock(stock);
+                        searchStockEventBus.onNext(new StockManagerEvent(R.string.data_message, true));
+                    }, error -> searchStockEventBus.onNext(new StockManagerEvent(R.string.error_message)));
+        } else {
+            searchStockEventBus.onNext(new StockManagerEvent(R.string.connection_message));
+        }
     }
 
     public void updateStocks() {
@@ -24,40 +55,49 @@ public class StockManager {
             Observable.from(storageManager.getStocks())
                     .map(Stock::getSymbol)
                     .toList()
+                    .filter(symbols -> symbols.size() > 0)
                     .flatMap(symbols -> apiManager.getStocks(symbols))
-                    .doOnSubscribe(() -> stocksEventBus.onNext(new StocksEvent(true)))
-                    .doOnNext(stocks -> storageManager.updateStocks(stocks))
-                    .doOnError(error -> stocksEventBus.onNext(new StocksEvent(false, R.string.error_message)))
-                    .doOnCompleted(() -> {
-                        boolean isEmpty = storageManager.getStocks().isEmpty();
-                        StocksEvent stocksEvent = isEmpty ? new StocksEvent(false) : new StocksEvent(false, R.string.data_message);
-                        stocksEventBus.onNext(stocksEvent);
-                    })
-                    .subscribe(stocks -> {}, error -> {});
+                    .doOnSubscribe(() -> updateStocksEventBus.onNext(new StockManagerEvent(true)))
+                    .doOnCompleted(() -> updateStocksEventBus.onNext(new StockManagerEvent(false)))
+                    .subscribe(stocks -> {
+                        storageManager.updateStocks(stocks);
+                        updateStocksEventBus.onNext(new StockManagerEvent(R.string.data_message, true));
+                    }, error -> updateStocksEventBus.onNext(new StockManagerEvent(R.string.error_message)));
         } else {
-            stocksEventBus.onNext(new StocksEvent(false, R.string.connection_message));
+            updateStocksEventBus.onNext(new StockManagerEvent(R.string.connection_message));
         }
     }
 
-    public Observable<StocksEvent> onStocksEvent() {
-        return stocksEventBus.asObservable();
+    public Observable<StockManagerEvent> onStockSearchEvent(boolean restarted) {
+        if (!restarted) {
+            searchStockEventBus.onCompleted();
+            searchStockEventBus = BehaviorSubject.create();
+        }
+        return searchStockEventBus.asObservable();
     }
 
-    public boolean hasPendingUpdate() {
-        return stocksEventBus.hasValue() && stocksEventBus.getValue().isUpdating();
+    public Observable<StockManagerEvent> onStocksUpdateEvent(boolean restarted) {
+        Observable<StockManagerEvent> stocksUpdateObservable = updateStocksEventBus.asObservable();
+        boolean hasInProgressEvent = updateStocksEventBus.hasValue() && updateStocksEventBus.getValue().isRunning();
+        return restarted && !hasInProgressEvent ? stocksUpdateObservable.skip(1) : stocksUpdateObservable;
     }
 
-    public class StocksEvent {
-        @Getter private boolean updating;
+    public class StockManagerEvent {
+        @Getter private boolean running;
         @Getter private String message;
+        @Getter private boolean complete;
 
-        public StocksEvent(boolean updating) {
-            this.updating = updating;
+        public StockManagerEvent(boolean running) {
+            this.running = running;
         }
 
-        public StocksEvent(boolean updating, int messageId) {
-            this.updating = updating;
+        public StockManagerEvent(int messageId) {
+            this(messageId, false);
+        }
+
+        public StockManagerEvent(int messageId, boolean complete) {
             message = StockHawkApplication.getApp().getString(messageId);
+            this.complete = complete;
         }
     }
 }

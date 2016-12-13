@@ -103,11 +103,11 @@ public class StocksActivity extends RxAppCompatActivity {
                 .compose(bindToLifecycle())
                 .subscribe(click -> stockManager.updateStocks());
 
-        stockManager.onStockManagerEvent(restarted)
+        stockManager.onStocksUpdateEvent(restarted)
                 .compose(bindToLifecycle())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(event -> {
-                    refreshLayout.setRefreshing(event.isInProgress());
+                    refreshLayout.setRefreshing(event.isRunning());
                     String message = event.getMessage();
                     if (message != null) {
                         Snackbar.make(messageLayout, message, Snackbar.LENGTH_LONG).show();
@@ -116,6 +116,7 @@ public class StocksActivity extends RxAppCompatActivity {
 
         storageManager.onSizeChanged()
                 .compose(bindToLifecycle())
+                .observeOn(AndroidSchedulers.mainThread())
                 .filter(size -> size == 0 || size == 1)
                 .subscribe(size -> {
                     boolean isEmpty = size == 0;
@@ -127,6 +128,7 @@ public class StocksActivity extends RxAppCompatActivity {
 
         storageManager.onTimestampChanged()
                 .compose(bindToLifecycle())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(timestamp -> timestampView.setText(getString(R.string.timestamp_message, timestamp)));
     }
 

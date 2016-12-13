@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -46,9 +45,7 @@ public class ApiManager {
 
     public Observable<List<Stock>> getStocks(List<String> symbols) {
         if (!symbols.isEmpty()) {
-            return stockApi.getStocks(getStocksQueryMap(symbols))
-                    .delay(3, TimeUnit.SECONDS)
-                    .subscribeOn(Schedulers.io());
+            return stockApi.getStocks(getStocksQueryMap(symbols)).subscribeOn(Schedulers.io());
         }
         return Observable.empty();
     }

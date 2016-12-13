@@ -15,8 +15,7 @@ import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.piatt.udacity.stockhawk.R;
 import com.piatt.udacity.stockhawk.StockHawkApplication;
-import com.piatt.udacity.stockhawk.manager.ApiManager;
-import com.piatt.udacity.stockhawk.manager.StorageManager;
+import com.piatt.udacity.stockhawk.manager.StockManager;
 import com.trello.rxlifecycle.components.support.RxAppCompatDialogFragment;
 
 import butterknife.BindView;
@@ -29,8 +28,15 @@ public class StockSearchDialog extends RxAppCompatDialogFragment {
     @BindView(R.id.search_view) TextInputEditText searchView;
     @BindView(R.id.add_button) AppCompatButton addButton;
 
-    private ApiManager apiManager = StockHawkApplication.getApp().getApiManager();
-    private StorageManager storageManager = StockHawkApplication.getApp().getStorageManager();
+    private boolean restarted;
+    private StockManager stockManager;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        stockManager = StockHawkApplication.getApp().getStockManager();
+        restarted = savedInstanceState != null;
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -67,35 +73,20 @@ public class StockSearchDialog extends RxAppCompatDialogFragment {
         Observable.merge(addButtonObservable, searchViewObservable)
                 .compose(bindToLifecycle())
                 .filter(actionId -> searchView.getText().length() > 0)
-                .flatMap(action -> {
-                    if (StockHawkApplication.getApp().isNetworkAvailable()) {
-                        String symbol = searchView.getText().toString();
-                        return apiManager.getStock(symbol);
-                    } else {
-                        searchLayout.setError(getString(R.string.connection_message));
-                        return Observable.empty();
-                    }
-                })
+                .subscribe(actionId -> {
+                    String symbol = searchView.getText().toString();
+                    stockManager.addStock(symbol);
+                });
+
+        stockManager.onStockSearchEvent(restarted)
+                .compose(bindToLifecycle())
                 .observeOn(AndroidSchedulers.mainThread())
-                .filter(stock -> {
-                    boolean valid = stock.isValid();
-                    if (!valid) {
-                        searchLayout.setError(getString(R.string.invalid_message));
+                .subscribe(event -> {
+                    if (event.isComplete()) {
+                        dismissAllowingStateLoss();
+                    } else if (searchView.getText().length() > 0) {
+                        searchLayout.setError(event.getMessage());
                     }
-                    return valid;
-                })
-                .filter(stock -> {
-                    boolean duplicateStock = storageManager.hasStock(stock);
-                    if (duplicateStock) {
-                        searchLayout.setError(getString(R.string.duplicate_message));
-                    }
-                    return !duplicateStock;
-                })
-                .doOnError(error -> searchLayout.setError(getString(R.string.error_message)))
-                .retry()
-                .subscribe(stock -> {
-                    storageManager.addStock(stock);
-                    dismiss();
-                }, error -> {});
+                });
     }
 }
