@@ -47,4 +47,5 @@ dependencies {
     compile 'com.jakewharton.rxbinding:rxbinding-appcompat-v7:1.0.0'
     compile 'com.jakewharton.rxbinding:rxbinding-recyclerview-v7:1.0.0'
     compile 'com.f2prateek.rx.preferences:rx-preferences:1.0.2'
+    compile 'com.github.PhilJay:MPAndroidChart:v3.0.1'
 }

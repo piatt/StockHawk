@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.LineChart;
 import com.jakewharton.rxbinding.support.v7.widget.RxToolbar;
 import com.piatt.udacity.stockhawk.R;
 import com.piatt.udacity.stockhawk.StockHawkApplication;
@@ -35,9 +36,11 @@ public class StockActivity extends RxAppCompatActivity {
     @BindView(R.id.average_volume_view) TextView averageVolumeView;
     @BindView(R.id.market_cap_view) TextView marketCapView;
     @BindView(R.id.timestamp_view) TextView timestampView;
+    @BindView(R.id.chart_view) LineChart chartView;
 
     private static final String STOCK_KEY = "STOCK_KEY";
     private StorageManager storageManager = StockHawkApplication.getApp().getStorageManager();
+    private String symbol;
 
     public static Intent buildIntent(Context context, String symbol) {
         Intent intent = new Intent(context, StockActivity.class);
@@ -51,12 +54,13 @@ public class StockActivity extends RxAppCompatActivity {
         setContentView(R.layout.stock_activity);
         ButterKnife.bind(this);
 
-        String symbol = getIntent().getStringExtra(STOCK_KEY);
-        configureToolbar(symbol);
-        configureStockView(symbol);
+        symbol = getIntent().getStringExtra(STOCK_KEY);
+        configureToolbar();
+        configureStockView();
+        configureChartView();
     }
 
-    private void configureToolbar(String symbol) {
+    private void configureToolbar() {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(symbol);
@@ -66,7 +70,7 @@ public class StockActivity extends RxAppCompatActivity {
                 .subscribe(click -> onBackPressed());
     }
 
-    private void configureStockView(String symbol) {
+    private void configureStockView() {
         Stock stock = storageManager.getStock(symbol);
         currentPriceView.setText(stock.getCurrentPrice());
         priceDeltaView.setText(stock.getPriceDelta());
@@ -88,5 +92,9 @@ public class StockActivity extends RxAppCompatActivity {
         averageVolumeView.setText(stock.getAverageVolume());
         marketCapView.setText(stock.getMarketCap());
         timestampView.setText(stock.getTimestamp());
+    }
+
+    private void configureChartView() {
+        
     }
 }
