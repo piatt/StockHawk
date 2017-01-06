@@ -12,25 +12,15 @@
         <item name="titleTextColor">@android:color/white</item>
     </style>
 
-    <!-- Message Views -->
-    <style name="HeaderView" parent="TextAppearance.AppCompat.Medium">
-        <item name="android:textStyle">bold</item>
-    </style>
-
     <!-- Search Views -->
     <style name="ErrorView" parent="TextAppearance.Design.Error">
         <item name="android:textColor">@color/accent</item>
     </style>
 
     <!-- Stock Views -->
-    <style name="SymbolView" parent="TextAppearance.AppCompat.Display1">
-        <item name="android:textAllCaps">true</item>
+    <style name="StockDeltaView" parent="TextAppearance.AppCompat.Large">
+        <item name="android:textStyle">bold</item>
     </style>
-    <style name="ListNameView" parent="TextAppearance.AppCompat.Caption"/>
-    <style name="DetailNameView" parent="TextAppearance.AppCompat.Medium"/>
-
-    <style name="CurrentPriceView" parent="TextAppearance.AppCompat.Display1"/>
-    <style name="DeltaView" parent="TextAppearance.AppCompat.Body2"/>
     <style name="StockKeyView" parent="TextAppearance.AppCompat.Body1"/>
     <style name="StockValueView" parent="TextAppearance.AppCompat.Medium">
         <item name="android:gravity">end</item>

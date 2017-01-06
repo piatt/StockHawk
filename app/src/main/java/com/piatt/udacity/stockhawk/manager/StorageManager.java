@@ -47,6 +47,7 @@ public class StorageManager {
 
     public void updateStocks(List<Stock> stocks) {
         timestamp.set(StockHawkApplication.getApp().getCurrentTimestamp());
+        Stream.of(stocks).forEach(stock -> stock.setTimestamp(timestamp.get()));
         stockStorage.set(stocks);
         updateStocksEventBus.onNext(stocks);
     }

@@ -11,8 +11,8 @@
 
     <TextView
         android:id="@+id/symbol_view"
-        app:layout_column="0"
-        style="@style/SymbolView"/>
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        app:layout_column="0"/>
 
     <android.support.v4.widget.Space
         app:layout_gravity="fill"
@@ -22,24 +22,24 @@
     <TextView
         android:id="@+id/current_price_view"
         android:gravity="end"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         app:layout_gravity="fill_horizontal"
-        app:layout_columnSpan="2"
-        style="@style/CurrentPriceView"/>
+        app:layout_columnSpan="2"/>
 
     <TextView
         android:id="@+id/name_view"
-        app:layout_column="0"
-        style="@style/ListNameView"/>
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        app:layout_column="0"/>
 
     <TextView
         android:id="@+id/price_delta_view"
         android:layout_marginEnd="@dimen/medium_margin"
         android:gravity="end"
-        app:layout_gravity="fill_horizontal"
-        style="@style/DeltaView"/>
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        app:layout_gravity="fill_horizontal"/>
 
     <TextView
         android:id="@+id/percent_delta_view"
-        style="@style/DeltaView"/>
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
 
 </android.support.v7.widget.GridLayout>

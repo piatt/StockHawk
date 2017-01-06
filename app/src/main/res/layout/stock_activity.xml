@@ -33,25 +33,30 @@
 
                 <TextView
                     android:id="@+id/name_view"
-                    app:layout_columnSpan="3"
-                    style="@style/ListNameView"/>
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    app:layout_columnSpan="3"/>
 
                 <TextView
                     android:id="@+id/current_price_view"
-                    android:layout_marginEnd="@dimen/large_margin"
-                    android:layout_marginBottom="@dimen/medium_margin"
-                    android:textSize="48sp"
-                    style="@style/CurrentPriceView"/>
+                    android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+                    app:layout_rowSpan="2"/>
+
+                <android.support.v4.widget.Space
+                    app:layout_gravity="fill"
+                    app:layout_columnWeight="1"
+                    app:layout_rowSpan="2"/>
 
                 <TextView
                     android:id="@+id/price_delta_view"
-                    android:layout_marginEnd="@dimen/standard_margin"
-                    style="@style/DeltaView"/>
+                    android:gravity="end"
+                    android:textAppearance="@style/StockDeltaView"
+                    app:layout_gravity="fill_horizontal"/>
 
                 <TextView
                     android:id="@+id/percent_delta_view"
-                    app:layout_gravity="start"
-                    style="@style/DeltaView"/>
+                    android:gravity="end"
+                    android:textAppearance="@style/StockDeltaView"
+                    app:layout_gravity="fill_horizontal"/>
 
             </android.support.v7.widget.GridLayout>
 

@@ -13,7 +13,7 @@ import lombok.Setter;
 
 @EqualsAndHashCode(of = "symbol")
 public class Stock {
-    @Getter @SerializedName("Symbol") private String symbol;
+    @SerializedName("Symbol") private String symbol;
     @Getter @SerializedName("Name") private String name;
     @SerializedName("LastTradePriceOnly") private String currentPrice;
     @SerializedName("Change") private String priceDelta;
@@ -46,8 +46,8 @@ public class Stock {
         return name != null;
     }
 
-    private String getFormattedDecimal(String price) {
-        return price != null ? decimalFormat.format(Float.parseFloat(price)) : null;
+    public String getSymbol() {
+        return symbol != null ? symbol.toUpperCase() : null;
     }
 
     public String getCurrentPrice() {
@@ -113,5 +113,9 @@ public class Stock {
 
     public boolean hasPositiveDelta() {
         return priceDelta != null && Float.parseFloat(priceDelta) >= 0;
+    }
+
+    private String getFormattedDecimal(String price) {
+        return price != null ? decimalFormat.format(Float.parseFloat(price)) : null;
     }
 }
