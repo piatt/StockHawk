@@ -50,13 +50,26 @@ public class ApiManager {
         return Observable.empty();
     }
 
+    public Observable<List<Stock>> getStockIntervals(String symbol, String startDate, String endDate) {
+        return stockApi.getStockIntervals(getStockIntervalsQueryMap(symbol, startDate, endDate));
+    }
+
     private Map<String, String> getStocksQueryMap(List<String> symbols) {
         String formattedSymbols = Stream.of(symbols)
                 .map(symbol -> String.format("'%s'", symbol))
                 .collect(Collectors.joining(","));
 
         Map<String, String> queryMap = new HashMap<>();
-        queryMap.put(StockApi.API_QUERY_KEY, String.format(StockApi.API_QUERY_VALUE, formattedSymbols));
+        queryMap.put(StockApi.API_QUERY_KEY, String.format(StockApi.API_UPDATE_QUERY_VALUE, formattedSymbols));
+        queryMap.put(StockApi.API_FORMAT_KEY, StockApi.API_FORMAT_VALUE);
+        queryMap.put(StockApi.API_ENVIRONMENT_KEY, StockApi.API_ENVIRONMENT_VALUE);
+
+        return queryMap;
+    }
+
+    private Map<String, String> getStockIntervalsQueryMap(String symbol, String startDate, String endDate) {
+        Map<String, String> queryMap = new HashMap<>();
+        queryMap.put(StockApi.API_QUERY_KEY, String.format(StockApi.API_INTERVAL_QUERY_VALUE_, symbol, startDate, endDate));
         queryMap.put(StockApi.API_FORMAT_KEY, StockApi.API_FORMAT_VALUE);
         queryMap.put(StockApi.API_ENVIRONMENT_KEY, StockApi.API_ENVIRONMENT_VALUE);
 
@@ -87,7 +100,8 @@ public class ApiManager {
         String API_BASE_URL = "https://query.yahooapis.com/v1/public/";
         String API_QUERY_ENDPOINT = "yql";
         String API_QUERY_KEY = "q";
-        String API_QUERY_VALUE = "select * from yahoo.finance.quotes where symbol in (%s)";
+        String API_UPDATE_QUERY_VALUE = "select * from yahoo.finance.quotes where symbol in (%s)";
+        String API_INTERVAL_QUERY_VALUE_= "select * from yahoo.finance.historicaldata where symbol = '%s' and startDate = '%s' and endDate = '%s'";
         String API_FORMAT_KEY = "format";
         String API_FORMAT_VALUE = "json";
         String API_ENVIRONMENT_KEY = "env";
@@ -98,5 +112,8 @@ public class ApiManager {
 
         @GET(API_QUERY_ENDPOINT)
         Observable<List<Stock>> getStocks(@QueryMap Map<String, String> stocksQueryMap);
+
+        @GET(API_QUERY_ENDPOINT)
+        Observable<List<Stock>> getStockIntervals(@QueryMap Map<String, String> stockIntervalsQueryMap);
     }
 }

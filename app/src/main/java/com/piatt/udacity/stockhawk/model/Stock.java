@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,18 +15,22 @@ import lombok.Setter;
 @EqualsAndHashCode(of = "symbol")
 public class Stock {
     @SerializedName("Symbol") private String symbol;
-    @Getter @SerializedName("Name") private String name;
     @SerializedName("LastTradePriceOnly") private String currentPrice;
     @SerializedName("Change") private String priceDelta;
     @SerializedName("PercentChange") private String percentDelta;
-    @SerializedName("PreviousClose") private String closePrice;
+    @SerializedName("PreviousClose") private String lastClosePrice;
     @SerializedName("Open") private String openPrice;
+    @SerializedName("Close") private String closePrice;
+    @SerializedName("Low") private String lowPrice;
+    @SerializedName("High") private String highPrice;
     @SerializedName("DaysLow") private String dayLowPrice;
     @SerializedName("DaysHigh") private String dayHighPrice;
     @SerializedName("YearLow") private String yearLowPrice;
     @SerializedName("YearHigh") private String yearHighPrice;
     @SerializedName("EPSEstimateCurrentYear") private String eps;
     @SerializedName("PEGRatio") private String pegRatio;
+    @Getter @SerializedName("Name") private String name;
+    @Getter @SerializedName("Date") private String date;
     @Getter @SerializedName("Volume") private String volume;
     @Getter @SerializedName("AverageDailyVolume") private String averageVolume;
     @Getter @SerializedName("MarketCapitalization") private String marketCap;
@@ -51,39 +56,55 @@ public class Stock {
     }
 
     public String getCurrentPrice() {
-        return getFormattedDecimal(currentPrice);
+        return getPriceAsFormattedString(currentPrice);
     }
 
-    public String getClosePrice() {
-        return getFormattedDecimal(closePrice);
+    public String getLastClosePrice() {
+        return getPriceAsFormattedString(lastClosePrice);
     }
 
-    public String getOpenPrice() {
-        return getFormattedDecimal(openPrice);
+    public String getLastOpenPrice() {
+        return getPriceAsFormattedString(openPrice);
+    }
+
+    public float getOpenPrice() {
+        return getPriceAsFormattedDecimal(openPrice);
+    }
+
+    public float getClosePrice() {
+        return getPriceAsFormattedDecimal(closePrice);
+    }
+
+    public float getLowPrice() {
+        return getPriceAsFormattedDecimal(lowPrice);
+    }
+
+    public float getHighPrice() {
+        return getPriceAsFormattedDecimal(highPrice);
     }
 
     public String getDayLowPrice() {
-        return getFormattedDecimal(dayLowPrice);
+        return getPriceAsFormattedString(dayLowPrice);
     }
 
     public String getDayHighPrice() {
-        return getFormattedDecimal(dayHighPrice);
+        return getPriceAsFormattedString(dayHighPrice);
     }
 
     public String getYearLowPrice() {
-        return getFormattedDecimal(yearLowPrice);
+        return getPriceAsFormattedString(yearLowPrice);
     }
 
     public String getYearHighPrice() {
-        return getFormattedDecimal(yearHighPrice);
+        return getPriceAsFormattedString(yearHighPrice);
     }
 
     public String getEps() {
-        return getFormattedDecimal(eps);
+        return getPriceAsFormattedString(eps);
     }
 
     public String getPegRatio() {
-        return getFormattedDecimal(pegRatio);
+        return getPriceAsFormattedString(pegRatio);
     }
 
     public String getPriceDelta() {
@@ -115,7 +136,15 @@ public class Stock {
         return priceDelta != null && Float.parseFloat(priceDelta) >= 0;
     }
 
-    private String getFormattedDecimal(String price) {
+    private String getPriceAsFormattedString(String price) {
         return price != null ? decimalFormat.format(Float.parseFloat(price)) : null;
+    }
+
+    private float getPriceAsFormattedDecimal(String price) {
+        try {
+            return decimalFormat.parse(price).floatValue();
+        } catch (ParseException e) {
+            return 0;
+        }
     }
 }

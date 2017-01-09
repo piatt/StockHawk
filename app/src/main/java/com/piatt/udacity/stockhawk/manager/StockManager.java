@@ -1,24 +1,36 @@
 package com.piatt.udacity.stockhawk.manager;
 
+import android.support.annotation.IntDef;
+
 import com.piatt.udacity.stockhawk.R;
 import com.piatt.udacity.stockhawk.StockHawkApplication;
 import com.piatt.udacity.stockhawk.model.Stock;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
+
 import lombok.Getter;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 import rx.subjects.BehaviorSubject;
 
 public class StockManager {
+    private final String DATE_FORMAT = "yyyy-MM-dd";
     private ApiManager apiManager;
     private StorageManager storageManager;
     private BehaviorSubject<StockManagerEvent> searchStockEventBus;
     private BehaviorSubject<StockManagerEvent> updateStocksEventBus;
+    private BehaviorSubject<List<Stock>> stockIntervalsEventBus;
 
     public StockManager() {
         apiManager = StockHawkApplication.getApp().getApiManager();
         storageManager = StockHawkApplication.getApp().getStorageManager();
         searchStockEventBus = BehaviorSubject.create();
         updateStocksEventBus = BehaviorSubject.create();
+        stockIntervalsEventBus = BehaviorSubject.create();
     }
 
     public void addStock(String symbol) {
@@ -68,6 +80,25 @@ public class StockManager {
         }
     }
 
+    public void fetchStockIntervals(String symbol, @StockIntervals int stockInterval) {
+        if (StockHawkApplication.getApp().isNetworkAvailable()) {
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+            dateFormat.setCalendar(calendar);
+            String endDate = dateFormat.format(calendar.getTime());
+            calendar.add(Calendar.DAY_OF_MONTH, -stockInterval);
+            String startDate = dateFormat.format(calendar.getTime());
+
+            apiManager.getStockIntervals(symbol, startDate, endDate)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(stockIntervals -> {
+                        stockIntervalsEventBus.onNext(stockIntervals);
+                    });
+        } else {
+
+        }
+    }
+
     public Observable<StockManagerEvent> onStockSearchEvent(boolean restarted) {
         if (!restarted) {
             searchStockEventBus.onCompleted();
@@ -80,6 +111,10 @@ public class StockManager {
         Observable<StockManagerEvent> stocksUpdateObservable = updateStocksEventBus.asObservable();
         boolean hasInProgressEvent = updateStocksEventBus.hasValue() && updateStocksEventBus.getValue().isRunning();
         return restarted && !hasInProgressEvent ? stocksUpdateObservable.skip(1) : stocksUpdateObservable;
+    }
+
+    public Observable<List<Stock>> onStockIntervalsEvent() {
+        return stockIntervalsEventBus.asObservable();
     }
 
     public class StockManagerEvent {
@@ -99,5 +134,12 @@ public class StockManager {
             message = StockHawkApplication.getApp().getString(messageId);
             this.complete = complete;
         }
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({StockIntervals.DAY, StockIntervals.WEEK, StockIntervals.MONTH,
+             StockIntervals.QUARTER, StockIntervals.HALFYEAR, StockIntervals.YEAR})
+    public @interface StockIntervals {
+        int DAY = 0, WEEK = 5, MONTH = 30, QUARTER = 90, HALFYEAR = 180, YEAR = 365;
     }
 }

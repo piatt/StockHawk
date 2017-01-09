@@ -74,7 +74,7 @@
                     app:layout_rowSpan="6"/>
 
                 <TextView
-                    android:id="@+id/close_price_view"
+                    android:id="@+id/last_close_price_view"
                     style="@style/StockValueView"/>
 
                 <android.support.v4.widget.Space
@@ -98,7 +98,7 @@
                     style="@style/StockKeyView"/>
 
                 <TextView
-                    android:id="@+id/open_price_view"
+                    android:id="@+id/last_open_price_view"
                     style="@style/StockValueView"/>
 
                 <TextView
@@ -175,10 +175,10 @@
 
             </android.support.v7.widget.GridLayout>
 
-            <com.github.mikephil.charting.charts.LineChart
+            <com.github.mikephil.charting.charts.CandleStickChart
                 android:id="@+id/chart_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="200dp"/>
 
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
