@@ -7,8 +7,8 @@ import android.support.annotation.NonNull;
 
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.f2prateek.rx.preferences2.Preference;
+import com.f2prateek.rx.preferences2.RxSharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.piatt.udacity.stockhawk.StockHawkApplication;
@@ -18,13 +18,12 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
-import rx.subjects.PublishSubject;
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 
 public class StorageManager {
     private final String PREF_TAG = "STOCK_HAWK";
     private final String PREF_TIMESTAMP = "TIMESTAMP";
-    private final String PREF_STOCKS = "STOCKS";
     private Preference<String> timestamp;
     private Preference<List<Stock>> stockStorage;
     private PublishSubject<List<Stock>> updateStocksEventBus;
@@ -85,15 +84,15 @@ public class StorageManager {
     }
 
     public Observable<List<Stock>> onStocksUpdated() {
-        return updateStocksEventBus.asObservable();
+        return updateStocksEventBus.hide();
     }
 
     public Observable<Stock> onStockAdded() {
-        return addStockEventBus.asObservable();
+        return addStockEventBus.hide();
     }
 
     public Observable<Stock> onStockRemoved() {
-        return removeStockEventBus.asObservable();
+        return removeStockEventBus.hide();
     }
 
     public Observable<Integer> onSizeChanged() {

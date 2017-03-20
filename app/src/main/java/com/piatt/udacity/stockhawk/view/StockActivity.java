@@ -20,13 +20,13 @@ import com.piatt.udacity.stockhawk.manager.StockManager;
 import com.piatt.udacity.stockhawk.manager.StockManager.StockIntervals;
 import com.piatt.udacity.stockhawk.manager.StorageManager;
 import com.piatt.udacity.stockhawk.model.Stock;
-import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
+import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.android.schedulers.AndroidSchedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 public class StockActivity extends RxAppCompatActivity {
     @BindView(R.id.toolbar) Toolbar toolbar;

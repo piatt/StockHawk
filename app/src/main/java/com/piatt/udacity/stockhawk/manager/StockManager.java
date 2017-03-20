@@ -10,12 +10,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.BehaviorSubject;
 import lombok.Getter;
-import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.subjects.BehaviorSubject;
 
 public class StockManager {
     private final String DATE_FORMAT = "yyyy-MM-dd";
@@ -35,9 +37,8 @@ public class StockManager {
 
     public void addStock(String symbol) {
         if (StockHawkApplication.getApp().isNetworkAvailable()) {
-            Observable.just(symbol)
-                    .toList()
-                    .flatMap(symbols -> apiManager.getStocks(symbols))
+            Single.just(symbol)
+                    .flatMap(sym -> apiManager.getStocks(Collections.singletonList(sym)))
                     .map(stocks -> stocks.get(0))
                     .filter(stock -> {
                         boolean valid = stock.isValid();
@@ -64,7 +65,7 @@ public class StockManager {
 
     public void updateStocks() {
         if (StockHawkApplication.getApp().isNetworkAvailable()) {
-            Observable.from(storageManager.getStocks())
+            Observable.fromIterable(storageManager.getStocks())
                     .map(Stock::getSymbol)
                     .toList()
                     .filter(symbols -> symbols.size() > 0)

@@ -18,13 +18,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.QueryMap;
-import rx.Observable;
-import rx.schedulers.Schedulers;
 
 public class ApiManager {
     private StockApi stockApi;
@@ -37,7 +38,7 @@ public class ApiManager {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(StockApi.API_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
 
         stockApi = retrofit.create(StockApi.class);
@@ -111,9 +112,9 @@ public class ApiManager {
         String API_QUOTE_MEMBER = "quote";
 
         @GET(API_QUERY_ENDPOINT)
-        Observable<List<Stock>> getStocks(@QueryMap Map<String, String> stocksQueryMap);
+        Flowable<List<Stock>> getStocks(@QueryMap Map<String, String> stocksQueryMap);
 
         @GET(API_QUERY_ENDPOINT)
-        Observable<List<Stock>> getStockIntervals(@QueryMap Map<String, String> stockIntervalsQueryMap);
+        Flowable<List<Stock>> getStockIntervals(@QueryMap Map<String, String> stockIntervalsQueryMap);
     }
 }
